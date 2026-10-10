@@ -40,6 +40,16 @@ h1{font-family:'Bungee',Impact,sans-serif;font-weight:400;font-size:clamp(2.25re
 .bar input,.bar select{width:100%;font:inherit;color:var(--text);background:var(--panel);border:2px solid var(--line);border-radius:999px;padding:.55em 1em;min-width:0}
 .bar select{appearance:none;-webkit-appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--text) 50%),linear-gradient(135deg,var(--text) 50%,transparent 50%);background-position:calc(100% - 20px) 55%,calc(100% - 14px) 55%;background-size:6px 6px;background-repeat:no-repeat;padding-right:2.2em}
 .bar input:focus,.bar select:focus{outline:none;border-color:var(--cyan)}
+.dd{position:relative;min-width:0}
+.dd-btn{width:100%;font:inherit;color:var(--text);background:var(--panel);border:2px solid var(--line);border-radius:999px;padding:.55em 2.2em .55em 1em;text-align:left;cursor:pointer;display:flex;align-items:center;gap:8px;min-width:0;background-image:linear-gradient(45deg,transparent 50%,var(--text) 50%),linear-gradient(135deg,var(--text) 50%,transparent 50%);background-position:calc(100% - 20px) 55%,calc(100% - 14px) 55%;background-size:6px 6px;background-repeat:no-repeat}
+.dd-btn:focus-visible,.dd.open .dd-btn{outline:none;border-color:var(--cyan)}
+.dd-cur{display:flex;align-items:center;gap:8px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dd-list{position:absolute;z-index:40;top:calc(100% + 6px);left:0;min-width:100%;width:max-content;max-width:min(320px,90vw);max-height:min(60vh,420px);overflow-y:auto;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:6px;box-shadow:0 12px 32px rgba(0,0,0,.45)}
+.dd-opt{display:flex;align-items:center;gap:10px;width:100%;font:inherit;font-weight:800;color:var(--text);background:none;border:0;border-radius:8px;padding:.5em .75em;text-align:left;cursor:pointer}
+.dd-opt:hover,.dd-opt:focus-visible{background:var(--hover);outline:none}
+.dd-opt[aria-selected="true"]{background:var(--cyan);color:var(--bg)}
+.sym{width:24px;height:24px;object-fit:contain;flex:none}
+.sym.none{visibility:hidden}
 .bar option{background:var(--panel);color:var(--text)}
 .bar input::placeholder{color:var(--muted)}
 .meta{display:flex;justify-content:space-between;align-items:center;margin:14px 0;color:var(--muted);gap:12px;flex-wrap:wrap}
@@ -95,7 +105,10 @@ h1{font-family:'Bungee',Impact,sans-serif;font-weight:400;font-size:clamp(2.25re
   <div class="bar" role="search">
     <input id="q" type="search" placeholder="Search name, set or number" aria-label="Search cards" autocomplete="off">
     <select id="rarity" aria-label="Rarity"></select>
-    <select id="set" aria-label="Set"></select>
+    <div class="dd" id="set">
+      <button type="button" class="dd-btn" aria-haspopup="listbox" aria-expanded="false"><span class="dd-cur">All sets</span></button>
+      <div class="dd-list" role="listbox" aria-label="Set" hidden></div>
+    </div>
     <select id="type" aria-label="Type"></select>
     <select id="sort" aria-label="Sort">
       <option value="new">Newest</option>
@@ -124,7 +137,36 @@ h1{font-family:'Bungee',Impact,sans-serif;font-weight:400;font-size:clamp(2.25re
   var LABEL={"Promo":"Black Star Promo"};
   var COND={"Near Mint":"NM","Lightly Played":"LP","Moderately Played":"MP","Heavily Played":"HP","Damaged":"DMG","Graded":"GRADED"};
   var $=function(id){return document.getElementById(id)};
-  var q=$("q"),selR=$("rarity"),selS=$("set"),selT=$("type"),selSort=$("sort"),grid=$("grid");
+  var q=$("q"),selR=$("rarity"),selT=$("type"),selSort=$("sort"),grid=$("grid");
+  var SYM_BASE="https://pokesymbols.com/images/tcg/sets/symbols/";
+  var PROMO_IMG="https://rodtcg.wordpress.com/wp-content/uploads/2026/10/black-star-promo.png";
+  var SYM_OVERRIDE={"SWSH Black Star Promo":"swsh-black-star-promos","Pokemon GO":"pokemon-go"};
+  function symUrl(name){
+    if(/promo/i.test(name)&&!SYM_OVERRIDE[name])return PROMO_IMG;
+    var slug=SYM_OVERRIDE[name]||name.replace(/^ME:\s*/i,"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+    return SYM_BASE+slug+".png";
+  }
+  function symImg(name){return '<img class="sym" alt="" loading="lazy" src="'+esc(symUrl(name))+'" onerror="this.classList.add(\'none\')">'}
+
+  var selS=(function(){
+    var root=$("set"),btn=root.querySelector(".dd-btn"),cur=root.querySelector(".dd-cur"),list=root.querySelector(".dd-list"),val="",names=[],api={onchange:null};
+    function show(){cur.innerHTML=val?symImg(val)+'<span>'+esc(val)+'</span>':'All sets'}
+    function close(){list.hidden=true;root.classList.remove("open");btn.setAttribute("aria-expanded","false")}
+    function open(){list.hidden=false;root.classList.add("open");btn.setAttribute("aria-expanded","true");var sel=list.querySelector('[aria-selected="true"]');if(sel)sel.scrollIntoView({block:"nearest"})}
+    function pick(v){val=v;show();paint();close();btn.focus();if(api.onchange)api.onchange()}
+    function paint(){[].forEach.call(list.children,function(o){o.setAttribute("aria-selected",o.getAttribute("data-v")===val?"true":"false")})}
+    api.fill=function(list_){
+      names=list_;
+      list.innerHTML=[""].concat(names).map(function(n){return '<button type="button" class="dd-opt" role="option" data-v="'+esc(n)+'">'+(n?symImg(n)+'<span>'+esc(n)+'</span>':'<span class="sym none"></span><span>All sets</span>')+'</button>'}).join("");
+      paint();
+    };
+    Object.defineProperty(api,"value",{get:function(){return val},set:function(v){val=names.indexOf(v)>=0?v:"";show();paint()}});
+    btn.addEventListener("click",function(){list.hidden?open():close()});
+    list.addEventListener("click",function(e){var o=e.target.closest(".dd-opt");if(o)pick(o.getAttribute("data-v"))});
+    document.addEventListener("click",function(e){if(!root.contains(e.target))close()});
+    root.addEventListener("keydown",function(e){if(e.key==="Escape"){close();btn.focus()}});
+    return api;
+  })();
   var groups=[];
 
   function lab(r){return LABEL[r]||r}
@@ -156,7 +198,7 @@ h1{font-family:'Bungee',Impact,sans-serif;font-weight:400;font-size:clamp(2.25re
     cards.forEach(function(c){var r=rarityOf(c);if(r)rar[r]=1;if(c.set)sets[c.set]=1;types[typeOf(c)]=1});
     var rs=RARITY_ORDER.filter(function(r){return rar[r]}).concat(Object.keys(rar).filter(function(r){return RARITY_ORDER.indexOf(r)<0}));
     fill(selR,"All rarities",rs.map(function(r){return [r,lab(r)]}));
-    fill(selS,"All sets",Object.keys(sets).sort().map(function(s){return [s,s]}));
+    selS.fill(Object.keys(sets).sort());
     var tv=[["raw","Raw cards"]],gr=Object.keys(types).filter(function(t){return t!=="Raw"}).sort();
     if(gr.length){tv.push(["slab","Slabs"]);if(gr.length>1)gr.forEach(function(t){tv.push(["slab:"+t,"Slabs \u2013 "+t])})}
     fill(selT,"All types",tv);
@@ -223,7 +265,8 @@ h1{font-family:'Bungee',Impact,sans-serif;font-weight:400;font-size:clamp(2.25re
     });
   }
 
-  [q,selR,selS,selT,selSort].forEach(function(el){el.addEventListener(el===q?"input":"change",function(){render();if(el.tagName==="SELECT")el.blur()})});
+  selS.onchange=render;
+  [q,selR,selT,selSort].forEach(function(el){el.addEventListener(el===q?"input":"change",function(){render();if(el.tagName==="SELECT")el.blur()})});
   $("clear").addEventListener("click",function(){q.value="";selR.value="";selS.value="";selT.value="";render()});
   grid.addEventListener("click",function(e){var m=e.target.closest(".more");if(m){var t=m.closest(".tile"),o=t.classList.toggle("open");m.setAttribute("aria-expanded",o);m.innerHTML=m.innerHTML.replace(/[\u25BE\u25B4]/,o?"\u25B4":"\u25BE");return}var p=e.target.closest(".pic.hasback");if(p&&matchMedia("(hover:none)").matches&&!p.classList.contains("flip")){e.preventDefault();p.classList.add("flip")}});
 
