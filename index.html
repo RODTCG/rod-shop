@@ -138,15 +138,87 @@ h1{font-family:'Bungee',Impact,sans-serif;font-weight:400;font-size:clamp(2.25re
   var COND={"Near Mint":"NM","Lightly Played":"LP","Moderately Played":"MP","Heavily Played":"HP","Damaged":"DMG","Graded":"GRADED"};
   var $=function(id){return document.getElementById(id)};
   var q=$("q"),selR=$("rarity"),selT=$("type"),selSort=$("sort"),grid=$("grid");
-  var SYM_BASE="https://pokesymbols.com/images/tcg/sets/symbols/";
+  var SYM_REMOTE="https://pokesymbols.com/images/tcg/sets/symbols/";
   var PROMO_IMG="https://rodtcg.wordpress.com/wp-content/uploads/2026/10/black-star-promo.png";
-  var SYM_OVERRIDE={"SWSH Black Star Promo":"swsh-black-star-promos","Pokemon GO":"pokemon-go"};
-  function symUrl(name){
-    if(/promo/i.test(name)&&!SYM_OVERRIDE[name])return PROMO_IMG;
-    var slug=SYM_OVERRIDE[name]||name.replace(/^ME:\s*/i,"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
-    return SYM_BASE+slug+".png";
+  // set name -> [local file in /symbols, file name on pokesymbols.com]
+  var SYMS={
+    "Ascended Heroes": [
+     "ascended-heroes",
+     "ascended-heroes"
+    ],
+    "Chaos Rising": [
+     "chaos-rising",
+     "chaos-rising"
+    ],
+    "Chilling Reign": [
+     "chilling-reign",
+     "chilling-reign"
+    ],
+    "XY: Evolutions": [
+     "xy-evolutions",
+     "xy-evolutions"
+    ],
+    "Evolutions": [
+     "xy-evolutions",
+     "xy-evolutions"
+    ],
+    "Journey Together": [
+     "journey-together",
+     "journey-together"
+    ],
+    "Mega Evolution": [
+     "mega-evolution",
+     "mega-evolution"
+    ],
+    "ME: 30th Celebration": [
+     "30th-celebration",
+     "30th-celebration"
+    ],
+    "Paradox Rift": [
+     "paradox-rift",
+     "paradox-rift"
+    ],
+    "Perfect Order": [
+     "perfect-order",
+     "perfect-order"
+    ],
+    "Phantasmal Flames": [
+     "phantasmal-flames",
+     "phantasmal-flames"
+    ],
+    "Pitch Black": [
+     "pitch-black",
+     "pitch-black"
+    ],
+    "Pokemon GO": [
+     "pokemon-go",
+     "pokemon-go"
+    ],
+    "Stellar Crown": [
+     "stellar-crown",
+     "stellar-crown"
+    ],
+    "Surging Sparks": [
+     "surging-sparks",
+     "surging-sparks"
+    ],
+    "Twilight Masquerade": [
+     "twilight-masquerade",
+     "twilight-masquerade"
+    ],
+    "SWSH Black Star Promo": [
+     "swsh-promo",
+     "_promo"
+    ]
+};
+  function symImg(name){
+    var m=SYMS[name],src,loc="",rem="";
+    if(m){loc="symbols/"+m[0]+".png";rem=SYM_REMOTE+m[1]+".png";src=loc}
+    else if(/promo/i.test(name)){src=PROMO_IMG}
+    else return '<span class="sym none"></span>';
+    return '<img class="sym" alt="" loading="lazy" src="'+esc(src)+'" data-rem="'+esc(rem)+'" onerror="symErr(this)">';
   }
-  function symImg(name){return '<img class="sym" alt="" loading="lazy" src="'+esc(symUrl(name))+'" onerror="this.classList.add(\'none\')">'}
+  window.symErr=function(i){var r=i.getAttribute("data-rem");if(r&&i.src.indexOf(r)<0){i.src=r}else{i.classList.add("none")}};
 
   var selS=(function(){
     var root=$("set"),btn=root.querySelector(".dd-btn"),cur=root.querySelector(".dd-cur"),list=root.querySelector(".dd-list"),val="",names=[],api={onchange:null};

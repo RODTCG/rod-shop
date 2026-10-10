@@ -1,0 +1,39 @@
+name: Fetch set symbols
+# One-time (or on demand): copies the set symbol images into this repo so the shop page never depends on pokesymbols.com being online.
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download symbols
+        run: |
+          mkdir -p symbols
+          fetch() { curl -fsSL "https://pokesymbols.com/images/tcg/sets/symbols/$2.png" -o "symbols/$1.png" || echo "FAILED $1"; }
+          fetch 30th-celebration 30th-celebration
+          fetch ascended-heroes ascended-heroes
+          fetch chaos-rising chaos-rising
+          fetch chilling-reign chilling-reign
+          fetch journey-together journey-together
+          fetch mega-evolution mega-evolution
+          fetch paradox-rift paradox-rift
+          fetch perfect-order perfect-order
+          fetch phantasmal-flames phantasmal-flames
+          fetch pitch-black pitch-black
+          fetch pokemon-go pokemon-go
+          fetch stellar-crown stellar-crown
+          fetch surging-sparks surging-sparks
+          fetch swsh-promo _promo
+          fetch twilight-masquerade twilight-masquerade
+          fetch xy-evolutions xy-evolutions
+          ls -la symbols
+      - name: Commit
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add symbols
+          git diff --cached --quiet || git commit -m "Add set symbols"
+          git push
