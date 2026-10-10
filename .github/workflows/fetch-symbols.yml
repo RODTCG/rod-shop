@@ -12,7 +12,8 @@ jobs:
       - name: Download symbols
         run: |
           mkdir -p symbols
-          fetch() { curl -fsSL "https://pokesymbols.com/images/tcg/sets/symbols/$2.png" -o "symbols/$1.png" || echo "FAILED $1"; }
+          # fetch <local name> <candidate> [<candidate> ...]; a candidate is a pokesymbols.com name or a full URL
+          fetch() { out=$1; shift; for c in "$@"; do case $c in http*) u=$c;; *) u="https://pokesymbols.com/images/tcg/sets/symbols/$c.png";; esac; curl -fsSL "$u" -o "symbols/$out.png" && { echo "OK $out <- $u"; return; }; done; rm -f "symbols/$out.png"; echo "FAILED $out"; }
           fetch 30th-celebration 30th-celebration
           fetch ascended-heroes ascended-heroes
           fetch chaos-rising chaos-rising
@@ -29,6 +30,10 @@ jobs:
           fetch swsh-promo _promo
           fetch twilight-masquerade twilight-masquerade
           fetch xy-evolutions xy-evolutions
+          fetch paldea-evolved paldea-evolved https://images.pokemontcg.io/sv2/symbol.png
+          fetch prismatic-evolutions prismatic-evolutions https://images.pokemontcg.io/sv8pt5/symbol.png
+          fetch shrouded-fable shrouded-fable https://images.pokemontcg.io/sv6pt5/symbol.png
+          fetch trick-or-trade trick-or-trade trick-or-trade-2024 trick-or-trade-2023 trick-or-trade-2022
           ls -la symbols
           mkdir -p rarities
           for r in special-illustration-rare illustration-rare mega-attack-rare ultra-rare ace-spec-rare double-rare rare uncommon common; do curl -fsSL "https://pokesymbols.com/images/tcg/rarities/$r.png" -o "rarities/$r.png" || echo "FAILED $r"; done
@@ -47,5 +52,4 @@ jobs:
           git config user.name "github-actions"
           git config user.email "actions@github.com"
           git add symbols rarities
-          git diff --cached --quiet || git commit -m "Add set symbols"
-          git push
+          git diff --cached --quiet || { git commit -m "Add set symbols"; git push; }
