@@ -30,10 +30,22 @@ jobs:
           fetch twilight-masquerade twilight-masquerade
           fetch xy-evolutions xy-evolutions
           ls -la symbols
+          mkdir -p rarities
+          for r in special-illustration-rare illustration-rare mega-attack-rare ultra-rare ace-spec-rare double-rare rare uncommon common; do curl -fsSL "https://pokesymbols.com/images/tcg/rarities/$r.png" -o "rarities/$r.png" || echo "FAILED $r"; done
+          ls -la rarities
+      - name: Shrink images
+        run: |
+          pip install pillow
+          python3 - <<'PY'
+          from PIL import Image
+          import glob
+          for f in glob.glob('symbols/*.png')+glob.glob('rarities/*.png'):
+              i=Image.open(f).convert('RGBA'); i.thumbnail((96,96)); i.save(f,optimize=True)
+          PY
       - name: Commit
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-          git add symbols
+          git add symbols rarities
           git diff --cached --quiet || git commit -m "Add set symbols"
           git push

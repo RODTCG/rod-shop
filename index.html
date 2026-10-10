@@ -50,6 +50,7 @@ h1{font-family:'Bungee',Impact,sans-serif;font-weight:400;font-size:clamp(2.25re
 .dd-opt[aria-selected="true"]{background:var(--cyan);color:var(--bg)}
 .sym{width:24px;height:24px;object-fit:contain;flex:none}
 .sym.none{visibility:hidden}
+.sym.r{width:44px;height:22px}
 .bar option{background:var(--panel);color:var(--text)}
 .bar input::placeholder{color:var(--muted)}
 .meta{display:flex;justify-content:space-between;align-items:center;margin:14px 0;color:var(--muted);gap:12px;flex-wrap:wrap}
@@ -104,7 +105,10 @@ h1{font-family:'Bungee',Impact,sans-serif;font-weight:400;font-size:clamp(2.25re
 
   <div class="bar" role="search">
     <input id="q" type="search" placeholder="Search name, set or number" aria-label="Search cards" autocomplete="off">
-    <select id="rarity" aria-label="Rarity"></select>
+    <div class="dd" id="rarity">
+      <button type="button" class="dd-btn" aria-haspopup="listbox" aria-expanded="false"><span class="dd-cur">All rarities</span></button>
+      <div class="dd-list" role="listbox" aria-label="Rarity" hidden></div>
+    </div>
     <div class="dd" id="set">
       <button type="button" class="dd-btn" aria-haspopup="listbox" aria-expanded="false"><span class="dd-cur">All sets</span></button>
       <div class="dd-list" role="listbox" aria-label="Set" hidden></div>
@@ -137,7 +141,7 @@ h1{font-family:'Bungee',Impact,sans-serif;font-weight:400;font-size:clamp(2.25re
   var LABEL={"Promo":"Black Star Promo"};
   var COND={"Near Mint":"NM","Lightly Played":"LP","Moderately Played":"MP","Heavily Played":"HP","Damaged":"DMG","Graded":"GRADED"};
   var $=function(id){return document.getElementById(id)};
-  var q=$("q"),selR=$("rarity"),selT=$("type"),selSort=$("sort"),grid=$("grid");
+  var q=$("q"),selT=$("type"),selSort=$("sort"),grid=$("grid");
   var SYM_REMOTE="https://pokesymbols.com/images/tcg/sets/symbols/";
   var PROMO_IMG="https://rodtcg.wordpress.com/wp-content/uploads/2026/10/black-star-promo.png";
   // set name -> [local file in /symbols, file name on pokesymbols.com]
@@ -220,25 +224,36 @@ h1{font-family:'Bungee',Impact,sans-serif;font-weight:400;font-size:clamp(2.25re
   }
   window.symErr=function(i){var r=i.getAttribute("data-rem");if(r&&i.src.indexOf(r)<0){i.src=r}else{i.classList.add("none")}};
 
-  var selS=(function(){
-    var root=$("set"),btn=root.querySelector(".dd-btn"),cur=root.querySelector(".dd-cur"),list=root.querySelector(".dd-list"),val="",names=[],api={onchange:null};
-    function show(){cur.innerHTML=val?symImg(val)+'<span>'+esc(val)+'</span>':'All sets'}
+  function makeDD(id,allText,icon){
+    var root=$(id),btn=root.querySelector(".dd-btn"),cur=root.querySelector(".dd-cur"),list=root.querySelector(".dd-list"),val="",items=[],api={onchange:null};
+    function labelOf(v){for(var i=0;i<items.length;i++)if(items[i][0]===v)return items[i][1];return v}
+    function show(){cur.innerHTML=val?icon(val)+'<span>'+esc(labelOf(val))+'</span>':esc(allText)}
     function close(){list.hidden=true;root.classList.remove("open");btn.setAttribute("aria-expanded","false")}
     function open(){list.hidden=false;root.classList.add("open");btn.setAttribute("aria-expanded","true");var sel=list.querySelector('[aria-selected="true"]');if(sel)sel.scrollIntoView({block:"nearest"})}
     function pick(v){val=v;show();paint();close();btn.focus();if(api.onchange)api.onchange()}
     function paint(){[].forEach.call(list.children,function(o){o.setAttribute("aria-selected",o.getAttribute("data-v")===val?"true":"false")})}
     api.fill=function(list_){
-      names=list_;
-      list.innerHTML=[""].concat(names).map(function(n){return '<button type="button" class="dd-opt" role="option" data-v="'+esc(n)+'">'+(n?symImg(n)+'<span>'+esc(n)+'</span>':'<span class="sym none"></span><span>All sets</span>')+'</button>'}).join("");
-      paint();
+      items=list_;
+      list.innerHTML=[["",allText]].concat(items).map(function(it){return '<button type="button" class="dd-opt" role="option" data-v="'+esc(it[0])+'">'+(it[0]?icon(it[0]):'<span class="sym none"></span>')+'<span>'+esc(it[1])+'</span></button>'}).join("");
+      paint();show();
     };
-    Object.defineProperty(api,"value",{get:function(){return val},set:function(v){val=names.indexOf(v)>=0?v:"";show();paint()}});
+    Object.defineProperty(api,"value",{get:function(){return val},set:function(v){val=items.some(function(i){return i[0]===v})?v:"";show();paint()}});
     btn.addEventListener("click",function(){list.hidden?open():close()});
     list.addEventListener("click",function(e){var o=e.target.closest(".dd-opt");if(o)pick(o.getAttribute("data-v"))});
     document.addEventListener("click",function(e){if(!root.contains(e.target))close()});
     root.addEventListener("keydown",function(e){if(e.key==="Escape"){close();btn.focus()}});
     return api;
-  })();
+  }
+  var RAR_REMOTE="https://pokesymbols.com/images/tcg/rarities/";
+  var RAR_FILES={"Special Illustration Rare":"special-illustration-rare","Illustration Rare":"illustration-rare","Mega Attack Rare":"mega-attack-rare","Ultra Rare":"ultra-rare","ACE SPEC Rare":"ace-spec-rare","Double Rare":"double-rare","Rare":"rare","Holo Rare":"rare","Rare Holo V":"rare","Uncommon":"uncommon","Common":"common"};
+  function rarImg(r){
+    var f=RAR_FILES[r];
+    if(f)return '<img class="sym r" alt="" loading="lazy" src="rarities/'+f+'.png" data-rem="'+RAR_REMOTE+f+'.png" onerror="symErr(this)">';
+    if(r==="Promo")return '<img class="sym r" alt="" loading="lazy" src="'+esc(PROMO_IMG)+'" style="object-fit:contain">';
+    return '<span class="sym r none"></span>';
+  }
+  var selS=makeDD("set","All sets",symImg);
+  var selR=makeDD("rarity","All rarities",rarImg);
   var groups=[];
 
   function lab(r){return LABEL[r]||r}
@@ -269,8 +284,8 @@ h1{font-family:'Bungee',Impact,sans-serif;font-weight:400;font-size:clamp(2.25re
     var rar={},sets={},types={};
     cards.forEach(function(c){var r=rarityOf(c);if(r)rar[r]=1;if(c.set)sets[c.set]=1;types[typeOf(c)]=1});
     var rs=RARITY_ORDER.filter(function(r){return rar[r]}).concat(Object.keys(rar).filter(function(r){return RARITY_ORDER.indexOf(r)<0}));
-    fill(selR,"All rarities",rs.map(function(r){return [r,lab(r)]}));
-    selS.fill(Object.keys(sets).sort());
+    selR.fill(rs.map(function(r){return [r,lab(r)]}));
+    selS.fill(Object.keys(sets).sort().map(function(n){return [n,n]}));
     var tv=[["raw","Raw cards"]],gr=Object.keys(types).filter(function(t){return t!=="Raw"}).sort();
     if(gr.length){tv.push(["slab","Slabs"]);if(gr.length>1)gr.forEach(function(t){tv.push(["slab:"+t,"Slabs \u2013 "+t])})}
     fill(selT,"All types",tv);
@@ -337,8 +352,8 @@ h1{font-family:'Bungee',Impact,sans-serif;font-weight:400;font-size:clamp(2.25re
     });
   }
 
-  selS.onchange=render;
-  [q,selR,selT,selSort].forEach(function(el){el.addEventListener(el===q?"input":"change",function(){render();if(el.tagName==="SELECT")el.blur()})});
+  selS.onchange=render;selR.onchange=render;
+  [q,selT,selSort].forEach(function(el){el.addEventListener(el===q?"input":"change",function(){render();if(el.tagName==="SELECT")el.blur()})});
   $("clear").addEventListener("click",function(){q.value="";selR.value="";selS.value="";selT.value="";render()});
   grid.addEventListener("click",function(e){var m=e.target.closest(".more");if(m){var t=m.closest(".tile"),o=t.classList.toggle("open");m.setAttribute("aria-expanded",o);m.innerHTML=m.innerHTML.replace(/[\u25BE\u25B4]/,o?"\u25B4":"\u25BE");return}var p=e.target.closest(".pic.hasback");if(p&&matchMedia("(hover:none)").matches&&!p.classList.contains("flip")){e.preventDefault();p.classList.add("flip")}});
 
