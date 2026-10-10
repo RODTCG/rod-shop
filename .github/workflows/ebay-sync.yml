@@ -37,7 +37,8 @@ jobs:
                      "secret rare": "Ultra Rare", "hyper rare": "Ultra Rare", "full art": "Ultra Rare", "rr": "Double Rare",
                      "holo": "Holo Rare", "rare holo": "Holo Rare", "holofoil": "Holo Rare", "ace spec rare": "ACE SPEC Rare",
                      "ace spec": "ACE SPEC Rare", "rare holo v": "Rare Holo V", "promo": "Promo",
-                     "black star promo": "Promo", "mar": "Mega Attack Rare"}
+                     "black star promo": "Promo", "mar": "Mega Attack Rare",
+                     "classic collection": "Ultra Rare", "rare holo legend": "Ultra Rare", "legend": "Ultra Rare"}
           GRADERS = ["PSA", "BGS", "CGC", "SGC", "TAG", "ACE", "Beckett"]
           CURATED = ["name", "number", "set", "rarity", "condition", "grader", "grade", "backPhotoUrl", "listedAt", "listedDate"]
 
@@ -167,6 +168,13 @@ jobs:
                            "and paste the whole ebay_keys note into it.")
               path = sys.argv[1] if len(sys.argv) > 1 else "cards.json"
               old = json.load(open(path))
+              # Optional overrides.json next to cards.json: {"<ebay item id>": {"rarity": "Ultra Rare", "set": "..."}, ...}
+              ov_path = os.path.join(os.path.dirname(os.path.abspath(path)), "overrides.json")
+              overrides = {}
+              if os.path.exists(ov_path):
+                  raw = json.load(open(ov_path))
+                  overrides = {str(k): {f: v for f, v in val.items() if v not in (None, "")}
+                               for k, val in raw.items() if isinstance(val, dict) and not str(k).startswith("_")}
               by_id = {str(c.get("ebayItemId")): c for c in old.get("cards", []) if c.get("ebayItemId")}
               tok = token(cid, secret)
               listings = active(tok)
@@ -191,9 +199,10 @@ jobs:
                       owned = {k: prev.get(k) for k in owned} | {"listPrice": owned["listPrice"] or prev.get("listPrice")}
                   card = dict(prev or {})
                   for k in CURATED:
-                      if not card.get(k) and fill.get(k):
+                      if fill.get(k) and (not card.get(k) or (k == "rarity" and card.get(k) == "Other" and fill[k] != "Other")):
                           card[k] = fill[k]
                   card.update({k: v for k, v in owned.items() if v not in (None, "")})
+                  card.update(overrides.get(lid, {}))   # hand corrections in overrides.json always win
                   cards.append({k: v for k, v in card.items() if v not in (None, "")})
                   if prev is None:
                       added.append(card.get("name"))
