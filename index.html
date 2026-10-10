@@ -5,16 +5,36 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Shop Singles &amp; Slabs | ROD TCG</title>
 <meta name="description" content="Pokémon singles and PSA slabs from ROD TCG. Search and filter by rarity, set and type. Every card links to its eBay listing.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Chivo:wght@400;800&display=swap" rel="stylesheet">
+<link rel="icon" href="https://rod-tcg.com/wp-content/uploads/2026/10/rod-favicon-512-1.png">
 <style>
 :root{--bg:#1B0F3A;--panel:#25174D;--line:#5A4A8B;--text:#FFF6E5;--muted:#D9D0F2;--cyan:#22D3EE;--pink:#FF4F9A;--hover:#3A2A6E}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 'Chivo',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
 a{color:inherit}
 .wrap{max-width:1200px;margin:0 auto;padding:0 16px}
-.top{display:flex;justify-content:space-between;align-items:center;padding:16px 0;gap:12px;flex-wrap:wrap}
-.top a{text-decoration:none;font-weight:800}
-.top .back{color:var(--muted);font-weight:700}
-h1{font-size:clamp(2rem,5vw,3.25rem);line-height:1.1;margin:.6em 0 .25em}
+.announce{background:var(--pink);color:var(--bg);text-align:center;padding:.6rem 16px;font-weight:800;letter-spacing:1px;font-size:.875rem}
+.announce a{text-decoration:none}
+.hdr{border-bottom:1px solid #3A2A6B;padding:1rem 0}
+.hdr .wrap,.ftr .wrap{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px}
+.brand{display:flex;align-items:center;gap:.75rem;text-decoration:none}
+.brand .t{font-family:'Bungee',Impact,sans-serif;font-size:1.5rem;color:var(--text);line-height:1}
+.icon{position:relative;z-index:0;width:44px;height:44px;flex:none;border-radius:50%;background:var(--panel);display:flex;align-items:center;justify-content:center;overflow:hidden;font-family:'Bungee',Impact,sans-serif;font-size:26px;line-height:1;color:var(--text);text-shadow:-2px -2px 0 var(--bg),2px -2px 0 var(--bg),-2px 2px 0 var(--bg),2px 2px 0 var(--bg)}
+.icon::before{content:"";position:absolute;z-index:-1;top:5px;left:5px;right:5px;bottom:5px;background:var(--pink);clip-path:polygon(50% 0%,57.33% 30%,81.67% 10.67%,69.33% 38.67%,100% 40%,72% 54%,93.33% 77.33%,63.33% 67.33%,60% 96.67%,47.33% 70%,26.67% 92.67%,32.67% 63.33%,0.67% 65.33%,26% 48%,4.67% 26%,34.67% 34%,30% 3.33%,46% 29.33%)}
+.nav{display:flex;flex-wrap:wrap;align-items:center;gap:1.5rem;font-weight:600}
+.nav a{text-decoration:none;color:var(--text)}
+.nav a:hover,.nav a[aria-current]{color:var(--cyan)}
+.nav .btn{background:var(--cyan);color:var(--bg);font-weight:800;border-radius:999px;padding:.6rem 1.1rem;transition:transform .15s ease,box-shadow .15s ease}
+.nav .btn:hover{color:var(--bg);transform:translateY(-2px);box-shadow:4px 4px 0 var(--pink)}
+.ftr{border-top:1px solid #3A2A6B;padding:2.5rem 0;margin-top:1rem;align-items:flex-start}
+.ftr .wrap{align-items:flex-start}
+.ftr .t{font-family:'Bungee',Impact,sans-serif;font-size:1.25rem;text-decoration:none}
+.ftr p{margin:.4rem 0 0;color:var(--muted);font-size:.9rem}
+.ftr a{color:var(--muted)}
+.ftr .nav{font-size:.95rem}
+a:focus-visible,button:focus-visible{outline:3px solid var(--cyan);outline-offset:3px}
+h1{font-family:'Bungee',Impact,sans-serif;font-weight:400;font-size:clamp(2.25rem,5vw,3.5rem);line-height:1.1;margin:1.1em 0 .3em}
 .sub{color:var(--muted);margin:0 0 1.25rem;max-width:46rem}
 .bar{position:sticky;top:0;z-index:20;background:var(--bg);padding:12px 0;border-bottom:1px solid var(--line);display:grid;gap:10px;grid-template-columns:2fr 1fr 1fr 1fr 1fr}
 .bar input,.bar select{width:100%;font:inherit;color:var(--text);background:var(--panel);border:2px solid var(--line);border-radius:999px;padding:.55em 1em;min-width:0}
@@ -37,18 +57,17 @@ h1{font-size:clamp(2rem,5vw,3.25rem);line-height:1.1;margin:.6em 0 .25em}
 .pills{display:flex;gap:6px;flex-wrap:wrap;font-size:.75rem;font-weight:800}
 .pill{border:1px solid var(--line);color:var(--muted);border-radius:999px;padding:.15em .7em}
 .pill.c{background:var(--cyan);color:var(--bg);border-color:var(--cyan)}
-.name{font-weight:800;text-decoration:none}
 .name:hover{color:var(--cyan)}
-.set{color:var(--muted);font-size:.875rem}
-.price{font-weight:800}
-.buy{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.buy .price{font-weight:800;text-decoration:none}
-.buy .go{margin-left:auto;font-size:.8125rem;font-weight:800;text-decoration:none;color:var(--bg);background:var(--cyan);border-radius:999px;padding:.25em .85em}
+.name{display:block;font-weight:800;text-decoration:none;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.info{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:.875rem;color:var(--muted)}
+.info .s{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.info .p{flex:none;font-weight:800;color:var(--text);font-size:.95rem}
 .more{font:inherit;font-size:.8125rem;font-weight:800;color:var(--cyan);background:none;border:0;padding:0;cursor:pointer;text-align:left;text-decoration:underline}
 .opts{display:none;flex-wrap:wrap;gap:6px;max-height:132px;overflow-y:auto;padding:8px;border:1px solid var(--line);border-radius:12px;background:var(--panel)}
 .tile.open .opts{display:flex}
 .opts a{border:1px solid var(--cyan);border-radius:999px;padding:.1em .7em;text-decoration:none;font-size:.8125rem;font-weight:800;white-space:nowrap}
 .opts a:hover{background:var(--cyan);color:var(--bg)}
+
 
 .empty{text-align:center;color:var(--muted);padding:60px 0;display:none}
 .cta{text-align:center;padding:0 0 56px}
@@ -58,8 +77,18 @@ h1{font-size:clamp(2rem,5vw,3.25rem);line-height:1.1;margin:.6em 0 .25em}
 </style>
 </head>
 <body>
+<div class="announce"><a href="https://www.ebay.com/usr/rodtcg">SINGLES &amp; SLABS IN THE EBAY STORE · SEALED COMING SOON →</a></div>
+<header class="hdr"><div class="wrap">
+  <a class="brand" href="https://rod-tcg.com/"><span class="icon" aria-hidden="true">R</span><span class="t">ROD TCG</span></a>
+  <nav class="nav" aria-label="Main">
+    <a href="./" aria-current="page">Shop</a>
+    <a href="https://rod-tcg.com/about/">About</a>
+    <a href="https://rod-tcg.com/about/#shipping">Shipping</a>
+    <a href="https://rod-tcg.com/about/#contact">Contact</a>
+    <a class="btn" href="https://www.ebay.com/usr/rodtcg">eBay Store</a>
+  </nav>
+</div></header>
 <div class="wrap">
-  <div class="top"><a href="https://rod-tcg.com/">ROD TCG</a><a class="back" href="https://rod-tcg.com/">&larr; Back to rod-tcg.com</a></div>
   <h1>Shop singles &amp; slabs</h1>
   <p class="sub">Every card links to its eBay listing, where you check out with eBay's buyer protection. Sealed product is coming soon.</p>
 
@@ -81,6 +110,13 @@ h1{font-size:clamp(2rem,5vw,3.25rem);line-height:1.1;margin:.6em 0 .25em}
   <p class="empty" id="empty">No cards match those filters.</p>
   <p class="cta"><a href="https://www.ebay.com/usr/rodtcg">See every listing on eBay</a></p>
 </div>
+<footer class="ftr"><div class="wrap">
+  <div><a class="t" href="https://rod-tcg.com/">ROD TCG</a><p>Trading Card Company</p></div>
+  <nav class="nav" aria-label="Footer">
+    <a href="./">Shop</a><a href="https://rod-tcg.com/about/">About</a><a href="https://rod-tcg.com/about/#shipping">Shipping</a><a href="https://rod-tcg.com/about/#contact">Contact</a>
+  </nav>
+  <div><p><a href="https://www.ebay.com/usr/rodtcg">ROD TCG on eBay</a> · <a href="https://www.instagram.com/rodtcg_/">@rodtcg_ on Instagram</a></p><p>© 2026 ROD TCG</p></div>
+</div></footer>
 
 <script>
 (function(){
@@ -121,9 +157,8 @@ h1{font-size:clamp(2rem,5vw,3.25rem);line-height:1.1;margin:.6em 0 .25em}
     var rs=RARITY_ORDER.filter(function(r){return rar[r]}).concat(Object.keys(rar).filter(function(r){return RARITY_ORDER.indexOf(r)<0}));
     fill(selR,"All rarities",rs.map(function(r){return [r,lab(r)]}));
     fill(selS,"All sets",Object.keys(sets).sort().map(function(s){return [s,s]}));
-    var tv=[["raw","Raw cards"]];
-    Object.keys(types).filter(function(t){return t!=="Raw"}).sort().forEach(function(t){tv.push(["slab:"+t,"Slabs – "+t])});
-    if(tv.length>1)tv.splice(1,0,["slab","All slabs"]);
+    var tv=[["raw","Raw cards"]],gr=Object.keys(types).filter(function(t){return t!=="Raw"}).sort();
+    if(gr.length){tv.push(["slab","Slabs"]);if(gr.length>1)gr.forEach(function(t){tv.push(["slab:"+t,"Slabs \u2013 "+t])})}
     fill(selT,"All types",tv);
   }
 
@@ -154,13 +189,13 @@ h1{font-size:clamp(2rem,5vw,3.25rem);line-height:1.1;margin:.6em 0 .25em}
       +(hasBack?'<span class="face bk"><img loading="lazy" src="'+esc(img(c.backPhotoUrl))+'" alt="'+alt+' back"></span>':'')+'</span>'
       +(multi?'<span class="qty">&times;'+g.length+'</span>':'');
     var meta=[c.set,c.number].filter(Boolean).join(" \u00b7 ");
-    var bottom='<div class="buy"><a class="price" href="'+esc(best.ebayUrl)+'" target="_blank" rel="noopener">'+(varies?"From ":"")+money(best)+'</a><a class="go" href="'+esc(best.ebayUrl)+'" target="_blank" rel="noopener">Buy on eBay</a></div>';
+    var bottom='';
     if(multi){
       bottom+='<button type="button" class="more" aria-expanded="false">'+g.length+' listings available \u25BE</button><div class="opts">'
         +sorted.map(function(x,i){return '<a href="'+esc(x.ebayUrl)+'" target="_blank" rel="noopener">#'+(i+1)+(varies?' \u00b7 '+money(x):'')+'</a>'}).join("")+'</div>';
     }
     return '<div class="tile"><a class="pic'+(slab?' slab':'')+(hasBack?' hasback':'')+'" href="'+esc(best.ebayUrl)+'" target="_blank" rel="noopener" aria-label="'+esc(c.name)+' on eBay">'+pic+'</a>'
-      +'<div class="pills">'+pills+'</div><a class="name" href="'+esc(best.ebayUrl)+'" target="_blank" rel="noopener">'+esc(c.name)+'</a><div class="set">'+esc(meta)+'</div>'+bottom+'</div>';
+      +'<div class="pills">'+pills+'</div><a class="name" href="'+esc(best.ebayUrl)+'" target="_blank" rel="noopener">'+esc(c.name)+'</a><div class="info"><span class="s">'+esc(meta)+'</span><span class="p">'+(varies?"From ":"")+money(best)+'</span></div>'+bottom+'</div>';
   }
 
   function render(){
