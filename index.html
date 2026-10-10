@@ -50,8 +50,7 @@ h1{font-family:'Bungee',Impact,sans-serif;font-weight:400;font-size:clamp(2.25re
 .dd-opt[aria-selected="true"]{background:var(--cyan);color:var(--bg)}
 .sym{width:24px;height:24px;object-fit:contain;flex:none}
 .sym.none{visibility:hidden}
-.sym.r{width:44px;height:22px}
-.sym.lt{filter:brightness(0) invert(1)}
+.sym.r{width:44px;height:26px;box-sizing:border-box;padding:3px 6px;background:#E4E1EE;border-radius:7px;box-shadow:inset 0 -2px 0 rgba(0,0,0,.12)}
 .bar option{background:var(--panel);color:var(--text)}
 .bar input::placeholder{color:var(--muted)}
 .meta{display:flex;justify-content:space-between;align-items:center;margin:14px 0;color:var(--muted);gap:12px;flex-wrap:wrap}
@@ -249,7 +248,7 @@ h1{font-family:'Bungee',Impact,sans-serif;font-weight:400;font-size:clamp(2.25re
   var RAR_FILES={"Special Illustration Rare":"special-illustration-rare","Illustration Rare":"illustration-rare","Mega Attack Rare":"mega-attack-rare","Ultra Rare":"ultra-rare","ACE SPEC Rare":"ace-spec-rare","Double Rare":"double-rare","Rare":"rare","Holo Rare":"rare","Rare Holo V":"rare","Uncommon":"uncommon","Common":"common"};
   function rarImg(r){
     var f=RAR_FILES[r];
-    if(f)return '<img class="sym r'+(/^(common|uncommon|rare|double-rare)$/.test(f)?' lt':'')+'" alt="" loading="lazy" src="rarities/'+f+'.png" data-rem="'+RAR_REMOTE+f+'.png" onerror="symErr(this)">';
+    if(f)return '<img class="sym r" alt="" loading="lazy" src="rarities/'+f+'.png" data-rem="'+RAR_REMOTE+f+'.png" onerror="symErr(this)">';
     if(r==="Promo")return '<img class="sym r" alt="" loading="lazy" src="'+esc(PROMO_IMG)+'" style="object-fit:contain">';
     return '<span class="sym r none"></span>';
   }
