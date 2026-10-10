@@ -76,7 +76,6 @@ h1{font-family:'Bungee',Impact,sans-serif;font-weight:400;font-size:clamp(2.25re
 .pic .face{position:absolute;left:0;top:0;width:100%;height:100%;border-radius:12px;overflow:hidden;background:var(--panel);backface-visibility:hidden;-webkit-backface-visibility:hidden}
 .pic .face.bk{transform:rotateY(180deg)}
 .pic img{width:100%;height:100%;object-fit:cover;display:block}
-.pic img.cr{position:absolute;max-width:none;height:auto}
 .pic.slab img{object-fit:contain}
 .qty{position:absolute;right:8px;bottom:8px;z-index:3;background:var(--cyan);color:var(--bg);font-weight:800;font-size:.8rem;border-radius:999px;padding:.15em .65em;pointer-events:none;box-shadow:0 2px 8px rgba(0,0,0,.4)}
 .pills{display:flex;gap:6px;flex-wrap:wrap;font-size:.75rem;font-weight:800}
@@ -340,17 +339,7 @@ h1{font-family:'Bungee',Impact,sans-serif;font-weight:400;font-size:clamp(2.25re
     return true;
   }
 
-  // Tight crop: show only the card, using the edges measured by the eBay sync ([l,t,r,b,width/height])
-  var CARD=63/88;
-  function photo(url,box,alt,lazy){
-    var a='<img'+(lazy?' loading="lazy"':'')+' src="'+esc(img(url))+'" alt="'+esc(alt)+'"';
-    if(!box||box.length<5||(box[0]<=0&&box[1]<=0&&box[2]>=1&&box[3]>=1))return a+'>';
-    var l=box[0],t=box[1],r=box[2],b=box[3],ar=box[4];
-    var wd=Math.max(1/(r-l),(1/CARD)*ar/(b-t));   // image width in card widths, so the card fills the frame
-    var hd=wd/ar;                                    // image height in card widths
-    var left=.5-(l+r)/2*wd,top=.5/CARD-(t+b)/2*hd;
-    return a+' class="cr" style="width:'+(wd*100).toFixed(2)+'%;left:'+(left*100).toFixed(2)+'%;top:'+(top*CARD*100).toFixed(2)+'%">';
-  }
+  function photo(url,alt,lazy){return '<img'+(lazy?' loading="lazy"':'')+' src="'+esc(img(url))+'" alt="'+esc(alt)+'">'}
 
   function tile(g){
     var c=g[0],slab=isSlab(c),sorted=g.slice().sort(function(a,b){return price(a)-price(b)}),best=sorted[0];
@@ -360,8 +349,8 @@ h1{font-family:'Bungee',Impact,sans-serif;font-weight:400;font-size:clamp(2.25re
     var pills='<span class="pill c">'+esc(cond)+'</span>'+(rar?'<span class="pill">'+esc(lab(rar))+'</span>':'');
     var hasBack=!!c.backPhotoUrl;
     var alt=esc(c.name+" "+(c.number||""));
-    var pic='<span class="tilt"><span class="in"><span class="face">'+(c.photoUrl?photo(c.photoUrl,c.crop,c.name+" "+(c.number||"")+" front",1):'')+'</span>'
-      +(hasBack?'<span class="face bk">'+photo(c.backPhotoUrl,c.backCrop,c.name+" "+(c.number||"")+" back",1)+'</span>':'')+'</span></span>'
+    var pic='<span class="tilt"><span class="in"><span class="face">'+(c.photoUrl?photo(c.photoUrl,c.name+" "+(c.number||"")+" front",1):'')+'</span>'
+      +(hasBack?'<span class="face bk">'+photo(c.backPhotoUrl,c.name+" "+(c.number||"")+" back",1)+'</span>':'')+'</span></span>'
       +(multi?'<span class="qty">&times;'+g.length+'</span>':'');
     var meta=[c.set,c.number].filter(Boolean).join(" \u00b7 ");
     var bottom='';
@@ -429,8 +418,8 @@ h1{font-family:'Bungee',Impact,sans-serif;font-weight:400;font-size:clamp(2.25re
     var alt=esc(c.name+" "+(c.number||""));
     lb=document.createElement("div");lb.className="lb";lb.setAttribute("role","dialog");lb.setAttribute("aria-modal","true");lb.setAttribute("aria-label",c.name);
     lb.innerHTML='<button class="x" type="button" aria-label="Close">&times;</button>'
-      +'<div class="pic'+(slab?' slab':'')+'" tabindex="0"><span class="tilt"><span class="in"><span class="face">'+photo(c.photoUrl,c.crop,c.name+" "+(c.number||"")+" front")+'</span>'
-      +(back?'<span class="face bk">'+photo(c.backPhotoUrl,c.backCrop,c.name+" "+(c.number||"")+" back")+'</span>':'')
+      +'<div class="pic'+(slab?' slab':'')+'" tabindex="0"><span class="tilt"><span class="in"><span class="face">'+photo(c.photoUrl,c.name+" "+(c.number||"")+" front")+'</span>'
+      +(back?'<span class="face bk">'+photo(c.backPhotoUrl,c.name+" "+(c.number||"")+" back")+'</span>':'')
       +'</span></span></div>'
       +'<div class="cap">'+esc(c.name)+' \u00b7 '+esc([c.set,c.number].filter(Boolean).join(" "))+'</div>'
       +'<div class="acts">'+(back?'<button type="button" class="fl">Flip card</button>':'')+'<a href="'+esc(best.ebayUrl)+'" target="_blank" rel="noopener">'+(g.length>1&&price(sorted[0])!==price(sorted[sorted.length-1])?"From ":"")+money(best)+' on eBay</a></div>';
