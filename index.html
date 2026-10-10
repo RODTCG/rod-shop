@@ -57,16 +57,12 @@ h1{font-family:'Bungee',Impact,sans-serif;font-weight:400;font-size:clamp(2.25re
 .meta button{font:inherit;font-weight:800;color:var(--cyan);background:none;border:0;cursor:pointer;text-decoration:underline;padding:0}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:36px 28px;padding-bottom:48px}
 .tile{display:flex;flex-direction:column;gap:8px}
-.pic{display:block;aspect-ratio:63/88;perspective:900px;position:relative;cursor:zoom-in;--rx:0deg;--ry:0deg;--mx:50%;--my:50%;--o:0}
+.pic{display:block;aspect-ratio:63/88;perspective:900px;position:relative;cursor:zoom-in;--rx:0deg;--ry:0deg;--o:0}
 .pic .tilt{position:absolute;inset:0;transform-style:preserve-3d;transform:rotateX(var(--rx)) rotateY(var(--ry)) scale(calc(1 + var(--o)*.04));transition:transform .5s cubic-bezier(.2,.8,.2,1);border-radius:12px;will-change:transform}
 .pic.live .tilt{transition:transform .08s linear}
 .pic:hover .tilt,.pic.live .tilt{box-shadow:0 18px 40px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.06)}
 .pic .in{position:absolute;left:0;top:0;width:100%;height:100%;transition:transform .7s cubic-bezier(.4,.2,.2,1);transform-style:preserve-3d}
 .pic.flip .in{transform:rotateY(180deg)}
-.pic .glare,.pic .holo{position:absolute;inset:0;border-radius:12px;pointer-events:none;opacity:var(--o);transition:opacity .4s ease;z-index:2}
-.pic .glare{background:radial-gradient(circle at var(--mx) var(--my),rgba(255,255,255,.55) 0%,rgba(255,255,255,.18) 22%,rgba(0,0,0,.25) 75%);mix-blend-mode:overlay}
-.pic .holo{background:repeating-linear-gradient(115deg,#ff4f9a 0%,#ffc93c 7%,#5fd49a 14%,#22d3ee 21%,#7b6cff 28%,#ff4f9a 35%);background-size:300% 300%;background-position:var(--mx) var(--my);mix-blend-mode:color-dodge;filter:brightness(.6) contrast(1.4) saturate(1.2);opacity:calc(var(--o) * var(--h,.35))}
-.pic.slab .holo{--h:.15}
 .lb{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:18px;padding:24px;background:rgba(10,5,25,.82);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);opacity:0;transition:opacity .25s ease}
 .lb.on{opacity:1}
 .lb .pic{width:min(78vw,calc((100vh - 210px)*63/88),420px);cursor:pointer;margin:8px 0 22px;animation:lbIn .45s cubic-bezier(.2,.8,.2,1)}
@@ -80,6 +76,7 @@ h1{font-family:'Bungee',Impact,sans-serif;font-weight:400;font-size:clamp(2.25re
 .pic .face{position:absolute;left:0;top:0;width:100%;height:100%;border-radius:12px;overflow:hidden;background:var(--panel);backface-visibility:hidden;-webkit-backface-visibility:hidden}
 .pic .face.bk{transform:rotateY(180deg)}
 .pic img{width:100%;height:100%;object-fit:cover;display:block}
+.pic img.cr{position:absolute;max-width:none;height:auto}
 .pic.slab img{object-fit:contain}
 .qty{position:absolute;right:8px;bottom:8px;z-index:3;background:var(--cyan);color:var(--bg);font-weight:800;font-size:.8rem;border-radius:999px;padding:.15em .65em;pointer-events:none;box-shadow:0 2px 8px rgba(0,0,0,.4)}
 .pills{display:flex;gap:6px;flex-wrap:wrap;font-size:.75rem;font-weight:800}
@@ -343,6 +340,18 @@ h1{font-family:'Bungee',Impact,sans-serif;font-weight:400;font-size:clamp(2.25re
     return true;
   }
 
+  // Tight crop: show only the card, using the edges measured by the eBay sync ([l,t,r,b,width/height])
+  var CARD=63/88;
+  function photo(url,box,alt,lazy){
+    var a='<img'+(lazy?' loading="lazy"':'')+' src="'+esc(img(url))+'" alt="'+esc(alt)+'"';
+    if(!box||box.length<5||(box[0]<=0&&box[1]<=0&&box[2]>=1&&box[3]>=1))return a+'>';
+    var l=box[0],t=box[1],r=box[2],b=box[3],ar=box[4];
+    var wd=Math.max(1/(r-l),(1/CARD)*ar/(b-t));   // image width in card widths, so the card fills the frame
+    var hd=wd/ar;                                    // image height in card widths
+    var left=.5-(l+r)/2*wd,top=.5/CARD-(t+b)/2*hd;
+    return a+' class="cr" style="width:'+(wd*100).toFixed(2)+'%;left:'+(left*100).toFixed(2)+'%;top:'+(top*CARD*100).toFixed(2)+'%">';
+  }
+
   function tile(g){
     var c=g[0],slab=isSlab(c),sorted=g.slice().sort(function(a,b){return price(a)-price(b)}),best=sorted[0];
     var multi=g.length>1,varies=multi&&price(sorted[0])!==price(sorted[sorted.length-1]);
@@ -351,8 +360,8 @@ h1{font-family:'Bungee',Impact,sans-serif;font-weight:400;font-size:clamp(2.25re
     var pills='<span class="pill c">'+esc(cond)+'</span>'+(rar?'<span class="pill">'+esc(lab(rar))+'</span>':'');
     var hasBack=!!c.backPhotoUrl;
     var alt=esc(c.name+" "+(c.number||""));
-    var pic='<span class="tilt"><span class="in"><span class="face">'+(c.photoUrl?'<img loading="lazy" src="'+esc(img(c.photoUrl))+'" alt="'+alt+' front">':'')+'</span>'
-      +(hasBack?'<span class="face bk"><img loading="lazy" src="'+esc(img(c.backPhotoUrl))+'" alt="'+alt+' back"></span>':'')+'</span><span class="glare"></span><span class="holo" style="--h:'+holoLevel(c)+'"></span></span>'
+    var pic='<span class="tilt"><span class="in"><span class="face">'+(c.photoUrl?photo(c.photoUrl,c.crop,c.name+" "+(c.number||"")+" front",1):'')+'</span>'
+      +(hasBack?'<span class="face bk">'+photo(c.backPhotoUrl,c.backCrop,c.name+" "+(c.number||"")+" back",1)+'</span>':'')+'</span></span>'
       +(multi?'<span class="qty">&times;'+g.length+'</span>':'');
     var meta=[c.set,c.number].filter(Boolean).join(" \u00b7 ");
     var bottom='';
@@ -394,13 +403,7 @@ h1{font-family:'Bungee',Impact,sans-serif;font-weight:400;font-size:clamp(2.25re
   $("clear").addEventListener("click",function(){q.value="";selR.value="";selS.value="";selT.value="";render()});
   grid.addEventListener("click",function(e){var m=e.target.closest(".more");if(m){var t=m.closest(".tile"),o=t.classList.toggle("open");m.setAttribute("aria-expanded",o);m.innerHTML=m.innerHTML.replace(/[\u25BE\u25B4]/,o?"\u25B4":"\u25BE");return}});
 
-  function holoLevel(c){
-    var r=rarityOf(c);
-    if(/Special Illustration|Hyper|Mega Attack|Ultra/.test(r))return .75;
-    if(/Illustration|Double|ACE|Holo|Promo|Rare Holo V/.test(r))return .5;
-    return .25;
-  }
-  // 3D tilt + glare that follow the pointer (mouse, pen or finger drag)
+  // 3D tilt that follows the pointer (mouse, pen or finger drag)
   var still=matchMedia("(prefers-reduced-motion:reduce)");
   function tiltAt(p,e){
     var r=p.getBoundingClientRect(),x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height;
@@ -408,8 +411,6 @@ h1{font-family:'Bungee',Impact,sans-serif;font-weight:400;font-size:clamp(2.25re
     var amt=p.closest(".lb")?18:12;
     p.style.setProperty("--ry",((x-.5)*amt*2).toFixed(2)+"deg");
     p.style.setProperty("--rx",((.5-y)*amt*2).toFixed(2)+"deg");
-    p.style.setProperty("--mx",(x*100).toFixed(1)+"%");
-    p.style.setProperty("--my",(y*100).toFixed(1)+"%");
     p.style.setProperty("--o","1");
   }
   function untilt(p){p.classList.remove("live");["--rx","--ry"].forEach(function(v){p.style.setProperty(v,"0deg")});p.style.setProperty("--o","0")}
@@ -428,9 +429,9 @@ h1{font-family:'Bungee',Impact,sans-serif;font-weight:400;font-size:clamp(2.25re
     var alt=esc(c.name+" "+(c.number||""));
     lb=document.createElement("div");lb.className="lb";lb.setAttribute("role","dialog");lb.setAttribute("aria-modal","true");lb.setAttribute("aria-label",c.name);
     lb.innerHTML='<button class="x" type="button" aria-label="Close">&times;</button>'
-      +'<div class="pic'+(slab?' slab':'')+'" tabindex="0"><span class="tilt"><span class="in"><span class="face"><img src="'+esc(img(c.photoUrl))+'" alt="'+alt+' front"></span>'
-      +(back?'<span class="face bk"><img src="'+esc(img(c.backPhotoUrl))+'" alt="'+alt+' back"></span>':'')
-      +'</span><span class="glare"></span><span class="holo" style="--h:'+holoLevel(c)+'"></span></span></div>'
+      +'<div class="pic'+(slab?' slab':'')+'" tabindex="0"><span class="tilt"><span class="in"><span class="face">'+photo(c.photoUrl,c.crop,c.name+" "+(c.number||"")+" front")+'</span>'
+      +(back?'<span class="face bk">'+photo(c.backPhotoUrl,c.backCrop,c.name+" "+(c.number||"")+" back")+'</span>':'')
+      +'</span></span></div>'
       +'<div class="cap">'+esc(c.name)+' \u00b7 '+esc([c.set,c.number].filter(Boolean).join(" "))+'</div>'
       +'<div class="acts">'+(back?'<button type="button" class="fl">Flip card</button>':'')+'<a href="'+esc(best.ebayUrl)+'" target="_blank" rel="noopener">'+(g.length>1&&price(sorted[0])!==price(sorted[sorted.length-1])?"From ":"")+money(best)+' on eBay</a></div>';
     document.body.appendChild(lb);document.body.style.overflow="hidden";
