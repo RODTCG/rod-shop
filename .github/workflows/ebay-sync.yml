@@ -1,7 +1,7 @@
 name: Sync shop with eBay
 # Keeps cards.json (the shop at shop.rod-tcg.com) matching the rodtcg ACTIVE eBay listings.
 # Runs every hour and on demand (Actions tab > Sync shop with eBay > Run workflow).
-# Needs repo secrets EBAY_CLIENT_ID and EBAY_CLIENT_SECRET. Only cards.json is ever changed.
+# Needs repo secret EBAY_KEYS (the whole ebay_keys note), or EBAY_CLIENT_ID + EBAY_CLIENT_SECRET. Only cards.json is ever changed.
 on:
   schedule:
     - cron: "17 * * * *"
@@ -20,6 +20,7 @@ jobs:
         env:
           EBAY_CLIENT_ID: ${{ secrets.EBAY_CLIENT_ID }}
           EBAY_CLIENT_SECRET: ${{ secrets.EBAY_CLIENT_SECRET }}
+          EBAY_KEYS: ${{ secrets.EBAY_KEYS }}
         run: |
           cat > /tmp/ebay_shop_sync.py <<'PY'
           """ROD TCG shop <- eBay sync (runs in GitHub Actions).
@@ -148,9 +149,22 @@ jobs:
 
 
           def main():
-              cid, secret = os.environ.get("EBAY_CLIENT_ID"), os.environ.get("EBAY_CLIENT_SECRET")
+              keys = {k: (os.environ.get(k) or "").strip() for k in ("EBAY_CLIENT_ID", "EBAY_CLIENT_SECRET")}
+              # Easiest setup: one secret EBAY_KEYS holding the whole key note (both KEY=value lines).
+              # A value pasted with its "EBAY_...=" prefix also works.
+              blob = "\n".join([os.environ.get("EBAY_KEYS") or ""] + list(keys.values()))
+              for line in blob.splitlines():
+                  k, sep, v = line.strip().partition("=")
+                  k = k.strip().removeprefix("export ").strip()
+                  if sep and k in keys:
+                      keys[k] = v.strip().strip('"').strip("'")
+              cid, secret = keys["EBAY_CLIENT_ID"], keys["EBAY_CLIENT_SECRET"]
               if not cid or not secret:
-                  sys.exit("EBAY_CLIENT_ID / EBAY_CLIENT_SECRET secrets are not set.")
+                  seen = {n: ("set" if (os.environ.get(n) or "").strip() else "MISSING")
+                          for n in ("EBAY_KEYS", "EBAY_CLIENT_ID", "EBAY_CLIENT_SECRET")}
+                  sys.exit(f"eBay keys not found. Secrets seen by this run: {seen}. Add a repository secret named "
+                           "EBAY_KEYS (Settings > Secrets and variables > Actions > Secrets tab > New repository secret) "
+                           "and paste the whole ebay_keys note into it.")
               path = sys.argv[1] if len(sys.argv) > 1 else "cards.json"
               old = json.load(open(path))
               by_id = {str(c.get("ebayItemId")): c for c in old.get("cards", []) if c.get("ebayItemId")}
