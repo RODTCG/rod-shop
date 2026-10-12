@@ -153,7 +153,7 @@ h1{font-family:'Bungee',Impact,sans-serif;font-weight:400;font-size:clamp(2.25re
 
 <script>
 (function(){
-  var RARITY_ORDER=["Special Illustration Rare","Illustration Rare","Mega Attack Rare","Ultra Rare","ACE SPEC Rare","Rare Holo V","Double Rare","Holo Rare","Rare","Uncommon","Common","Promo","Bulk lot","Other"];
+  var RARITY_ORDER=["Special Illustration Rare","Illustration Rare","Mega Attack Rare","Ultra Rare","Radiant Rare","ACE SPEC Rare","Rare Holo V","Double Rare","Holo Rare","Rare","Uncommon","Common","Promo","Bulk lot","Other"];
   var LABEL={"Promo":"Black Star Promo"};
   var COND={"Near Mint":"NM","Lightly Played":"LP","Moderately Played":"MP","Heavily Played":"HP","Damaged":"DMG","Graded":"GRADED"};
   var $=function(id){return document.getElementById(id)};
@@ -305,7 +305,7 @@ h1{font-family:'Bungee',Impact,sans-serif;font-weight:400;font-size:clamp(2.25re
     return api;
   }
   var RAR_REMOTE="https://pokesymbols.com/images/tcg/rarities/";
-  var RAR_FILES={"Special Illustration Rare":"special-illustration-rare","Illustration Rare":"illustration-rare","Mega Attack Rare":"mega-attack-rare","Ultra Rare":"ultra-rare","ACE SPEC Rare":"ace-spec-rare","Double Rare":"double-rare","Rare":"rare","Holo Rare":"rare","Rare Holo V":"rare","Uncommon":"uncommon","Common":"common"};
+  var RAR_FILES={"Special Illustration Rare":"special-illustration-rare","Illustration Rare":"illustration-rare","Mega Attack Rare":"mega-attack-rare","Ultra Rare":"ultra-rare","Radiant Rare":"radiant-rare","ACE SPEC Rare":"ace-spec-rare","Double Rare":"double-rare","Rare":"rare","Holo Rare":"rare","Rare Holo V":"rare","Uncommon":"uncommon","Common":"common"};
   function rarImg(r){
     var f=RAR_FILES[r];
     if(f)return '<img class="sym r" alt="" loading="lazy" src="rarities/'+f+'.png" data-rem="'+RAR_REMOTE+f+'.png" onerror="symErr(this)">';
