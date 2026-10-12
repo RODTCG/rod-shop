@@ -225,11 +225,28 @@ jobs:
           PY
           python3 /tmp/ebay_shop_sync.py cards.json
       - name: Commit cards.json if it changed
+        env:
+          EBAY_CLIENT_ID: ${{ secrets.EBAY_CLIENT_ID }}
+          EBAY_CLIENT_SECRET: ${{ secrets.EBAY_CLIENT_SECRET }}
+          EBAY_KEYS: ${{ secrets.EBAY_KEYS }}
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
           git add cards.json
           if git diff --cached --quiet; then echo "Shop already matches eBay."; exit 0; fi
           git commit -m "Sync shop data from eBay"
-          for i in 1 2 3; do git pull --rebase origin main && git push origin HEAD:main && exit 0; sleep 5; done
-          exit 1
+          # cards.json is one minified line, so a concurrent change always conflicts on rebase.
+          # If the rebase/push fails, drop our commit, start from the latest main, re-run the sync and try again.
+          for i in 1 2 3; do
+            if git pull --rebase origin main && git push origin HEAD:main; then exit 0; fi
+            echo "Push attempt $i failed; re-syncing on top of latest main."
+            git rebase --abort 2>/dev/null || true
+            git fetch origin main
+            git reset --hard origin/main
+            python3 /tmp/ebay_shop_sync.py cards.json || exit 1
+            git add cards.json
+            if git diff --cached --quiet; then echo "Shop already matches eBay."; exit 0; fi
+            git commit -m "Sync shop data from eBay"
+            sleep 5
+          done
+          git pull --rebase origin main && git push origin HEAD:main
