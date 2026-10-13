@@ -1,10 +1,10 @@
 name: Sync shop with eBay
 # Keeps cards.json (the shop at shop.rod-tcg.com) matching the rodtcg ACTIVE eBay listings.
-# Runs every hour and on demand (Actions tab > Sync shop with eBay > Run workflow).
+# Runs every 3 hours and on demand (Actions tab > Sync shop with eBay > Run workflow).
 # Needs repo secret EBAY_KEYS (the whole ebay_keys note), or EBAY_CLIENT_ID + EBAY_CLIENT_SECRET. Only cards.json is ever changed.
 on:
   schedule:
-    - cron: "17 * * * *"
+    - cron: "17 */3 * * *"
   workflow_dispatch:
 permissions:
   contents: write
@@ -136,7 +136,7 @@ jobs:
               lid = legacy(s)
               a = {x.get("name", "").lower(): x.get("value", "") for x in d.get("localizedAspects", [])}
               price = (d.get("price") or s.get("price") or {}).get("value")
-              imgs = [i.get("imageUrl") for i in d.get("additionalImages", []) if i.get("imageUrl")]
+              imgs = [i.get("imageUrl") for i in (d.get("additionalImages") or s.get("additionalImages") or []) if i.get("imageUrl")]
               owned = {"ebayItemId": lid, "ebayUrl": f"https://www.ebay.com/itm/{lid}",
                        "listPrice": float(price) if price is not None else None,
                        "photoUrl": clean((d.get("image") or s.get("image") or {}).get("imageUrl"))}
@@ -185,12 +185,17 @@ jobs:
                   lid = legacy(s)
                   if not lid:
                       continue
-                  try:
-                      d = get(tok, f"/buy/browse/v1/item/{urllib.parse.quote(s['itemId'], safe='')}")
-                  except Exception as ex:
-                      d = None
-                      print(f"detail failed for {lid}: {ex}", file=sys.stderr)
                   prev = by_id.get(lid)
+                  if prev is not None:
+                      # Known card: price, front photo and extra photos all come with the search results,
+                      # so skip the per-item detail call (it was ~175 calls/run against eBay's 5,000/day limit).
+                      d = {}
+                  else:
+                      try:
+                          d = get(tok, f"/buy/browse/v1/item/{urllib.parse.quote(s['itemId'], safe='')}")
+                      except Exception as ex:
+                          d = None
+                          print(f"detail failed for {lid}: {ex}", file=sys.stderr)
                   if d is None and prev is None:
                       skipped.append(lid)          # new listing without details: pick it up next run
                       continue
