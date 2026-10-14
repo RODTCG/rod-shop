@@ -98,7 +98,8 @@ h1{font-family:'Bungee',Impact,sans-serif;font-weight:400;font-size:clamp(2.25re
 .empty{text-align:center;color:var(--muted);padding:60px 0;display:none}
 .cta{text-align:center;padding:0 0 56px}
 .cta a{display:inline-block;background:var(--pink);color:var(--bg);font-weight:800;border-radius:999px;padding:.7em 1.6em;text-decoration:none}
-@media(max-width:820px){.bar{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.bar #q{grid-column:1/-1}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:26px 12px}.wrap{padding:0 12px}}
+#sort .dd-list{left:auto;right:0}
+@media(max-width:820px){.bar{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.bar #q{grid-column:1/-1}.bar .dd{position:static}.bar .dd-list,.bar #sort .dd-list{left:0;right:0;top:auto;margin-top:6px;width:auto;min-width:0;max-width:none}.dd-opt span:last-child{min-width:0;overflow-wrap:anywhere}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:26px 12px}.wrap{padding:0 12px}}
 @media(prefers-reduced-motion:reduce){.pic img{transition:none}}
 </style>
 </head>
@@ -128,13 +129,14 @@ h1{font-family:'Bungee',Impact,sans-serif;font-weight:400;font-size:clamp(2.25re
       <button type="button" class="dd-btn" aria-haspopup="listbox" aria-expanded="false"><span class="dd-cur">All sets</span></button>
       <div class="dd-list" role="listbox" aria-label="Set" hidden></div>
     </div>
-    <select id="type" aria-label="Type"></select>
-    <select id="sort" aria-label="Sort">
-      <option value="new">Newest</option>
-      <option value="low">Price: low to high</option>
-      <option value="high">Price: high to low</option>
-      <option value="name">Name A–Z</option>
-    </select>
+    <div class="dd" id="type">
+      <button type="button" class="dd-btn" aria-haspopup="listbox" aria-expanded="false"><span class="dd-cur">All types</span></button>
+      <div class="dd-list" role="listbox" aria-label="Type" hidden></div>
+    </div>
+    <div class="dd" id="sort">
+      <button type="button" class="dd-btn" aria-haspopup="listbox" aria-expanded="false"><span class="dd-cur">Newest</span></button>
+      <div class="dd-list" role="listbox" aria-label="Sort" hidden></div>
+    </div>
   </div>
 
   <div class="meta"><span id="count">Loading…</span><button id="clear" hidden>Clear filters</button></div>
@@ -156,7 +158,7 @@ h1{font-family:'Bungee',Impact,sans-serif;font-weight:400;font-size:clamp(2.25re
   var LABEL={"Promo":"Black Star Promo"};
   var COND={"Near Mint":"NM","Lightly Played":"LP","Moderately Played":"MP","Heavily Played":"HP","Damaged":"DMG","Graded":"GRADED"};
   var $=function(id){return document.getElementById(id)};
-  var q=$("q"),selT=$("type"),selSort=$("sort"),grid=$("grid");
+  var q=$("q"),grid=$("grid");
   var SYM_REMOTE="https://pokesymbols.com/images/tcg/sets/symbols/";
   var PROMO_IMG="https://rodtcg.wordpress.com/wp-content/uploads/2026/10/black-star-promo.png";
   // set name -> [local file in /symbols, file name on pokesymbols.com]
@@ -286,14 +288,15 @@ h1{font-family:'Bungee',Impact,sans-serif;font-weight:400;font-size:clamp(2.25re
   function makeDD(id,allText,icon){
     var root=$(id),btn=root.querySelector(".dd-btn"),cur=root.querySelector(".dd-cur"),list=root.querySelector(".dd-list"),val="",items=[],api={onchange:null};
     function labelOf(v){for(var i=0;i<items.length;i++)if(items[i][0]===v)return items[i][1];return v}
-    function show(){cur.innerHTML=val?icon(val)+'<span>'+esc(labelOf(val))+'</span>':esc(allText)}
+    var ic=icon||function(){return ""};
+    function show(){cur.innerHTML=val?ic(val)+'<span>'+esc(labelOf(val))+'</span>':esc(allText)}
     function close(){list.hidden=true;root.classList.remove("open");btn.setAttribute("aria-expanded","false")}
     function open(){list.hidden=false;root.classList.add("open");btn.setAttribute("aria-expanded","true");var sel=list.querySelector('[aria-selected="true"]');if(sel)sel.scrollIntoView({block:"nearest"})}
     function pick(v){val=v;show();paint();close();btn.focus();if(api.onchange)api.onchange()}
     function paint(){[].forEach.call(list.children,function(o){o.setAttribute("aria-selected",o.getAttribute("data-v")===val?"true":"false")})}
     api.fill=function(list_){
       items=list_;
-      list.innerHTML=[["",allText]].concat(items).map(function(it){return '<button type="button" class="dd-opt" role="option" data-v="'+esc(it[0])+'">'+(it[0]?icon(it[0]):'<span class="sym none"></span>')+'<span>'+esc(it[1])+'</span></button>'}).join("");
+      list.innerHTML=[["",allText]].concat(items).map(function(it){return '<button type="button" class="dd-opt" role="option" data-v="'+esc(it[0])+'">'+(icon?(it[0]?icon(it[0]):'<span class="sym none"></span>'):"")+'<span>'+esc(it[1])+'</span></button>'}).join("");
       paint();show();
     };
     Object.defineProperty(api,"value",{get:function(){return val},set:function(v){val=items.some(function(i){return i[0]===v})?v:"";show();paint()}});
@@ -313,6 +316,9 @@ h1{font-family:'Bungee',Impact,sans-serif;font-weight:400;font-size:clamp(2.25re
   }
   var selS=makeDD("set","All sets",symImg);
   var selR=makeDD("rarity","All rarities",rarImg);
+  var selT=makeDD("type","All types",null);
+  var selSort=makeDD("sort","Newest",null);
+  selSort.fill([["low","Price: low to high"],["high","Price: high to low"],["name","Name A–Z"]]);
   var groups=[];
 
   function lab(r){return LABEL[r]||r}
@@ -347,7 +353,7 @@ h1{font-family:'Bungee',Impact,sans-serif;font-weight:400;font-size:clamp(2.25re
     selS.fill(Object.keys(sets).sort().map(function(n){return [n,n]}));
     var tv=[["raw","Raw cards"]],gr=Object.keys(types).filter(function(t){return t!=="Raw"}).sort();
     if(gr.length){tv.push(["slab","Slabs"]);if(gr.length>1)gr.forEach(function(t){tv.push(["slab:"+t,"Slabs \u2013 "+t])})}
-    fill(selT,"All types",tv);
+    selT.fill(tv);
   }
 
   function matches(g){
@@ -389,7 +395,7 @@ h1{font-family:'Bungee',Impact,sans-serif;font-weight:400;font-size:clamp(2.25re
   }
 
   function render(){
-    var list=groups.filter(matches),s=selSort.value;
+    var list=groups.filter(matches),s=selSort.value||"new";
     if(s==="low")list.sort(function(a,b){return price(a[0])-price(b[0])});
     else if(s==="high")list.sort(function(a,b){return price(b[0])-price(a[0])});
     else if(s==="name")list.sort(function(a,b){return a[0].name.localeCompare(b[0].name)});
@@ -409,12 +415,12 @@ h1{font-family:'Bungee',Impact,sans-serif;font-weight:400;font-size:clamp(2.25re
     var p=new URLSearchParams(location.search);
     q.value=p.get("q")||"";
     [["rarity",selR],["set",selS],["type",selT],["sort",selSort]].forEach(function(x){
-      var v=p.get(x[0]);if(v){x[1].value=v;if(x[1].value!==v)x[1].value=x[0]==="sort"?"new":""}
+      var v=p.get(x[0]);if(v)x[1].value=v
     });
   }
 
-  selS.onchange=render;selR.onchange=render;
-  [q,selT,selSort].forEach(function(el){el.addEventListener(el===q?"input":"change",function(){render();if(el.tagName==="SELECT")el.blur()})});
+  selS.onchange=render;selR.onchange=render;selT.onchange=render;selSort.onchange=render;
+  q.addEventListener("input",render);
   $("clear").addEventListener("click",function(){q.value="";selR.value="";selS.value="";selT.value="";render()});
   grid.addEventListener("click",function(e){var m=e.target.closest(".more");if(m){var t=m.closest(".tile"),o=t.classList.toggle("open");m.setAttribute("aria-expanded",o);m.innerHTML=m.innerHTML.replace(/[\u25BE\u25B4]/,o?"\u25B4":"\u25BE");return}});
 
