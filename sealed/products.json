@@ -1,5 +1,5 @@
 {
- "_note": "Extra detail for sealed product pages, keyed by the product name the shop shows (from the eBay title, or overrides.json). Price, photos and the Buy link always come from the live eBay listing in cards.json. Images are paths inside /sealed/. A product with no entry here still gets a page built from its listing photos.",
+ "_note": "Extra detail for sealed product pages, keyed by the product name the shop shows (from the eBay title, or overrides.json). Price, photos and the Buy link always come from the live eBay listing in cards.json. Images are paths inside /sealed/. A product with no entry here still gets a page built from its listing photos. '_upcoming' lists products shown as COMING SOON tiles (no price or link) until they are listed on eBay; remove an entry once it's live.",
  "Destined Rivals Elite Trainer Box": {
   "titleTop": "Destined Rivals",
   "titleBottom": "Elite Trainer Box",
@@ -8,12 +8,32 @@
   "hero": "img/destined-rivals-etb.webp",
   "blurb": "Nine Destined Rivals booster packs, a full-art foil promo and everything you need to sleeve up and start playing, all in one box. It's factory sealed and ships from our shop with the same care we give every card, so it's ready to rip open at your kitchen table. Perfect for the collector who loves the thrill of the pull, or anyone starting their first collection.",
   "highlights": [
-   {"n": "9", "label": "Booster packs", "img": "img/destined-rivals-packs.webp"},
-   {"n": "1", "label": "Full-art foil promo", "img": "img/destined-rivals-promo.webp"},
-   {"n": "65", "label": "Card sleeves"},
-   {"n": "45", "label": "Energy cards"},
-   {"n": "6+1", "label": "Dice"},
-   {"n": "4", "label": "Box dividers"}
+   {
+    "n": "9",
+    "label": "Booster packs",
+    "img": "img/destined-rivals-packs.webp"
+   },
+   {
+    "n": "1",
+    "label": "Full-art foil promo",
+    "img": "img/destined-rivals-promo.webp"
+   },
+   {
+    "n": "65",
+    "label": "Card sleeves"
+   },
+   {
+    "n": "45",
+    "label": "Energy cards"
+   },
+   {
+    "n": "6+1",
+    "label": "Dice"
+   },
+   {
+    "n": "4",
+    "label": "Box dividers"
+   }
   ],
   "contents": [
    "9 Scarlet & Violet: Destined Rivals booster packs",
@@ -27,5 +47,14 @@
    "1 collector's box with 4 dividers",
    "1 code card for Pokémon Trading Card Game Live"
   ]
- }
+ },
+ "_upcoming": [
+  {
+   "name": "Prismatic Evolutions Premium Figure Collection",
+   "set": "Prismatic Evolutions",
+   "productType": "Premium Collection",
+   "hero": "img/prismatic-premium-figure-collection.webp",
+   "glow": "rgba(34,211,238,.38)"
+  }
+ ]
 }
