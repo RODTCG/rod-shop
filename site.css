@@ -1,0 +1,48 @@
+/* Shared look for the sealed pages (same tokens and header/footer as index.html). */
+:root{--bg:#1B0F3A;--panel:#25174D;--deep:#12081f;--line:#5A4A8B;--rule:#3A2A6B;--text:#FFF6E5;--muted:#D9D0F2;--cyan:#22D3EE;--pink:#FF4F9A;--hover:#3A2A6E}
+*{box-sizing:border-box}
+html,body{max-width:100%;overflow-x:clip}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 'Chivo',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+a{color:inherit}
+img{max-width:100%}
+.wrap{max-width:1200px;margin:0 auto;padding:0 16px}
+.disp{font-family:'Bungee',Impact,sans-serif;font-weight:400}
+.announce{background:var(--pink);color:var(--bg);text-align:center;padding:.6rem 16px;font-weight:800;letter-spacing:1px;font-size:.875rem}
+.announce a{text-decoration:none}
+.hdr{border-bottom:1px solid var(--rule);padding:1rem 0;position:relative;z-index:30}
+.hdr .wrap,.ftr .wrap{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px}
+.brand{display:flex;align-items:center;gap:.75rem;text-decoration:none}
+.brand .t{font-family:'Bungee',Impact,sans-serif;font-size:1.5rem;color:var(--text);line-height:1}
+.icon{position:relative;z-index:0;width:44px;height:44px;flex:none;border-radius:50%;background:var(--panel);display:flex;align-items:center;justify-content:center;overflow:hidden;font-family:'Bungee',Impact,sans-serif;font-size:26px;line-height:1;color:var(--text);text-shadow:-2px -2px 0 var(--bg),2px -2px 0 var(--bg),-2px 2px 0 var(--bg),2px 2px 0 var(--bg)}
+.icon::before{content:"";position:absolute;z-index:-1;top:5px;left:5px;right:5px;bottom:5px;background:var(--pink);clip-path:polygon(50% 0%,57.33% 30%,81.67% 10.67%,69.33% 38.67%,100% 40%,72% 54%,93.33% 77.33%,63.33% 67.33%,60% 96.67%,47.33% 70%,26.67% 92.67%,32.67% 63.33%,0.67% 65.33%,26% 48%,4.67% 26%,34.67% 34%,30% 3.33%,46% 29.33%)}
+.nav{display:flex;flex-wrap:wrap;align-items:center;gap:1.5rem;font-weight:600}
+.nav a{text-decoration:none;color:var(--text)}
+.nav a:hover,.nav a[aria-current]{color:var(--cyan)}
+.nav .btn{background:var(--cyan);color:var(--bg);font-weight:800;border-radius:999px;padding:.6rem 1.1rem;transition:transform .15s ease,box-shadow .15s ease}
+.nav .btn:hover{color:var(--bg);transform:translateY(-2px);box-shadow:4px 4px 0 var(--pink)}
+.menu{position:relative}
+.menu>a::after{content:" \25BE";font-size:.8em}
+.menu-list{display:none;position:absolute;top:100%;left:-14px;min-width:200px;padding:8px;margin-top:6px;background:var(--panel);border:2px solid var(--line);border-radius:12px;flex-direction:column;gap:2px;z-index:40;box-shadow:0 12px 32px rgba(0,0,0,.45)}
+.menu-list::before{content:"";position:absolute;left:0;right:0;top:-12px;height:12px}
+.menu:hover .menu-list,.menu:focus-within .menu-list{display:flex}
+.menu-list a{padding:.55rem .85rem;border-radius:8px;white-space:nowrap}
+.menu-list a:hover{background:var(--hover)}
+.ftr{border-top:1px solid var(--rule);padding:2.5rem 0;margin-top:1rem}
+.ftr .wrap{align-items:flex-start}
+.ftr .t{font-family:'Bungee',Impact,sans-serif;font-size:1.25rem;text-decoration:none}
+.ftr p{margin:.4rem 0 0;color:var(--muted);font-size:.9rem}
+.ftr a{color:var(--muted)}
+.ftr .nav{font-size:.95rem}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--cyan);outline-offset:3px}
+.crumbs{color:var(--muted);font-size:.875rem;margin-top:1.75rem}
+.crumbs a{color:var(--muted)}
+.pill{border:1px solid var(--line);color:var(--muted);border-radius:999px;padding:.15em .7em}
+.pill.c{background:var(--cyan);color:var(--bg);border-color:var(--cyan)}
+.cta{text-align:center;padding:0 0 56px}
+.cta a{display:inline-block;background:var(--pink);color:var(--bg);font-weight:800;border-radius:999px;padding:.7em 1.6em;text-decoration:none}
+.news{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between;border:2px solid var(--cyan);border-radius:20px;background:var(--panel);padding:24px 28px;margin:8px 0 40px}
+.news .h{font-family:'Bungee',Impact,sans-serif;font-size:1.4rem;line-height:1.2}
+.news p{margin:.35rem 0 0;color:var(--muted)}
+.news a{background:var(--cyan);color:var(--bg);font-weight:800;border-radius:999px;padding:.7em 1.5em;text-decoration:none}
+@media(max-width:820px){.wrap{padding:0 12px}.menu-list{left:auto;right:-8px}}
+@media(max-width:560px){.nav{gap:1rem}.menu-list{left:-8px;right:auto}}

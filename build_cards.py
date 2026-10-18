@@ -8,7 +8,7 @@ Only cards with status "listed" are published, and only the public fields below 
 import json, sys
 from datetime import datetime, timezone
 
-KEEP = ["name", "number", "set", "rarity", "condition", "grader", "grade", "listPrice", "ebayUrl",
+KEEP = ["name", "number", "set", "rarity", "condition", "grader", "grade", "kind", "productType", "photos", "listPrice", "ebayUrl",
         "photoUrl", "backPhotoUrl", "listedAt", "listedDate", "ebayItemId"]
 
 def main():

@@ -40,7 +40,44 @@ jobs:
                      "black star promo": "Promo", "mar": "Mega Attack Rare",
                      "classic collection": "Ultra Rare", "rare holo legend": "Ultra Rare", "legend": "Ultra Rare"}
           GRADERS = ["PSA", "BGS", "CGC", "SGC", "TAG", "ACE", "Beckett"]
-          CURATED = ["name", "number", "set", "rarity", "condition", "grader", "grade", "backPhotoUrl", "listedAt", "listedDate"]
+          CURATED = ["name", "number", "set", "rarity", "condition", "grader", "grade", "backPhotoUrl", "productType", "listedAt", "listedDate"]
+          # Sealed product (ETBs, booster boxes...): eBay "Sealed" category or a "New/Factory Sealed" condition.
+          # (words in the listing title, product type shown on the shop). Longer phrases first.
+          SEALED_TYPES = [("elite trainer box", "Elite Trainer Box"), ("etb", "Elite Trainer Box"),
+                          ("booster box", "Booster Box"), ("booster bundle", "Booster Bundle"),
+                          ("ultra premium collection", "Premium Collection"), ("super premium collection", "Premium Collection"),
+                          ("premium figure collection", "Premium Collection"), ("premium collection", "Premium Collection"),
+                          ("collection box", "Collection Box"), ("collection", "Collection Box"),
+                          ("mini tin", "Tin"), ("tin", "Tin"), ("build & battle", "Build & Battle"), ("blister", "Blister"),
+                          ("booster pack", "Booster Pack"), ("sleeved booster", "Booster Pack")]
+          SEALED_NOISE = (r"\b(pok[eé]mon|tcg|the|trading card game|scarlet\s*(?:&|and)\s*violet|sword\s*(?:&|and)\s*shield|"
+                          r"sv\d*\w*|swsh\d*|factory|sealed|brand|new|nib|english|official|authentic|in hand|ships fast|free shipping|etb)\b")
+
+
+          def is_sealed(s, d):
+              for x in (s, d):
+                  if "sealed" in (x.get("condition") or "").lower() or "sealed" in (x.get("categoryPath") or "").lower():
+                      return True
+                  if any("sealed" in (c.get("categoryName") or "").lower() for c in x.get("categories") or []):
+                      return True
+              return False
+
+
+          def sealed_info(title):
+              """'Pokemon TCG Scarlet & Violet Destined Rivals Elite Trainer Box ETB Sealed New'
+                 -> ('Destined Rivals Elite Trainer Box', 'Destined Rivals', 'Elite Trainer Box')"""
+              t = (title or "").strip()
+              low = t.lower()
+              for key, ptype in SEALED_TYPES:
+                  m = re.search(r"\b" + re.escape(key) + r"\b", low)
+                  if m:
+                      break
+              else:
+                  return None, None, "Sealed"
+              set_ = re.sub(r"\s+", " ", re.sub(SEALED_NOISE, " ", t[:m.start()], flags=re.I)).strip(" -–|:,")
+              set_ = (set_.title() if set_.islower() else set_) or None
+              shown = ptype if key == "etb" else " ".join(w if w.isupper() else w.capitalize() for w in t[m.start():m.end()].split())
+              return (f"{set_} {shown}" if set_ else shown), set_, ptype
 
 
           def http(req, tries=3):
@@ -140,6 +177,14 @@ jobs:
               owned = {"ebayItemId": lid, "ebayUrl": f"https://www.ebay.com/itm/{lid}",
                        "listPrice": float(price) if price is not None else None,
                        "photoUrl": clean((d.get("image") or s.get("image") or {}).get("imageUrl"))}
+              if is_sealed(s, d):
+                  owned["kind"] = "sealed"
+                  owned["photos"] = [u for u in [owned["photoUrl"]] + [clean(i) for i in imgs] if u] or None
+                  name, set_, ptype = sealed_info(s.get("title"))
+                  fill = {"name": name or s.get("title"), "set": set_, "productType": ptype, "condition": "Sealed",
+                          "backPhotoUrl": clean(imgs[0]) if imgs else None,
+                          "listedAt": s.get("itemCreationDate"), "listedDate": (s.get("itemCreationDate") or "")[:10] or None}
+                  return owned, fill
               cond = condition(d)
               grader, grade = grading(d, a) if cond == "Graded" else (None, None)
               fill = {"name": a.get("card name") or a.get("character") or s.get("title"), "set": a.get("set"),
@@ -203,6 +248,10 @@ jobs:
                   if d is None:                    # keep the old price/photo rather than a partial value
                       owned = {k: prev.get(k) for k in owned} | {"listPrice": owned["listPrice"] or prev.get("listPrice")}
                   card = dict(prev or {})
+                  if owned.get("kind") == "sealed" and card.get("kind") != "sealed":
+                      # first time this listing is seen as sealed: replace card-style fields read from item specifics
+                      for k in ("name", "set", "number", "rarity", "condition", "grader", "grade"):
+                          card.pop(k, None)
                   for k in CURATED:
                       if fill.get(k) and (not card.get(k) or (k == "rarity" and card.get(k) == "Other" and fill[k] != "Other")):
                           card[k] = fill[k]

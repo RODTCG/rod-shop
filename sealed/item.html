@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sealed product | ROD TCG</title>
+<meta name="description" content="Factory-sealed Pokémon TCG product from ROD TCG. Checkout through eBay with buyer protection.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Chivo:wght@400;800&display=swap" rel="stylesheet">
+<link rel="icon" href="https://rod-tcg.com/wp-content/uploads/2026/10/rod-favicon-512-1.png">
+<link rel="stylesheet" href="../site.css">
+<style>
+main{display:flex;flex-direction:column;gap:40px;padding-bottom:64px}
+.top{display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center}
+h1{font-family:'Bungee',Impact,sans-serif;font-weight:400;margin:0;font-size:clamp(2.2rem,6vw,4.25rem);line-height:1.02;text-transform:uppercase}
+h1 span{color:var(--accent,var(--pink))}
+.blurb{margin:0;color:var(--muted);font-size:1.1rem;line-height:1.6;max-width:46rem}
+.stage{display:flex;flex-wrap:wrap;align-items:center;gap:24px;border-radius:28px;padding:28px;border:1px solid var(--line);background:radial-gradient(circle at 50% 58%,var(--glow,rgba(255,59,78,.55)),transparent 60%),repeating-linear-gradient(115deg,transparent 0 46px,rgba(255,79,154,.14) 46px 96px,transparent 96px 120px,rgba(34,211,238,.10) 120px 138px),linear-gradient(160deg,#2a0f3d,#12081f)}
+.side{flex:1 1 220px;min-width:0;display:flex;flex-direction:column;gap:14px}
+.hl{border:2px solid var(--rule);border-radius:14px;background:var(--panel);padding:12px 14px;display:flex;align-items:center;gap:12px}
+.side.l .hl{flex-direction:row;text-align:right}
+.side.r .hl{flex-direction:row-reverse;text-align:left}
+.hl .im{flex:0 0 84px;width:84px;height:60px;display:flex;align-items:center;justify-content:center}
+.hl .im img{max-width:100%;max-height:100%;object-fit:contain}
+.hl .tx{flex:1;min-width:0}
+.hl .n{font-family:'Bungee',Impact,sans-serif;font-size:1.6rem;color:var(--pink);line-height:1}
+.hl .l{color:var(--muted);margin-top:4px;font-size:.875rem}
+.center{flex:1.4 1 360px;min-width:0;display:flex;flex-direction:column;align-items:center;gap:16px}
+.hero{width:100%;max-width:460px;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;background:none;border:0;padding:0;cursor:zoom-in}
+.hero img{width:100%;height:auto;filter:drop-shadow(0 28px 36px rgba(0,0,0,.65)) drop-shadow(0 0 44px var(--glow,rgba(255,59,78,.45)))}
+.hero img.photo{max-height:100%;width:auto;border-radius:16px;filter:drop-shadow(0 20px 30px rgba(0,0,0,.6))}
+@keyframes rodfloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+.hero img.cut{animation:rodfloat 5s ease-in-out infinite}
+.hint{color:var(--muted);font-size:.75rem;letter-spacing:1px}
+.thumbs{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.thumbs button{width:76px;height:76px;padding:4px;border-radius:12px;border:2px solid var(--line);background:var(--panel);cursor:zoom-in}
+.thumbs button:hover{border-color:var(--cyan)}
+.thumbs img{width:100%;height:100%;object-fit:cover;border-radius:8px;display:block}
+.buy{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:20px;border:2px solid var(--cyan);border-radius:20px;background:var(--panel);padding:22px 28px}
+.buy .k{color:var(--muted);font-size:.8rem;letter-spacing:2px;font-weight:800}
+.buy .v{font-weight:800;font-size:clamp(2.2rem,5vw,3.25rem);line-height:1.1}
+.buy .acts{display:flex;flex-wrap:wrap;gap:12px}
+.buy .acts a{text-decoration:none;font-weight:800;border-radius:14px;padding:16px 28px;font-size:1.1rem}
+.buy .go{background:var(--pink);color:var(--bg);font-size:1.2rem!important;padding:18px 36px!important}
+.buy .back{border:2px solid var(--text)}
+.cols{display:flex;flex-wrap:wrap;gap:32px}
+.cols>div{flex:1 1 360px;min-width:0}
+h2{font-family:'Bungee',Impact,sans-serif;font-weight:400;margin:0 0 12px;font-size:1.75rem}
+.chk{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.chk li{display:flex;gap:12px;color:var(--muted);line-height:1.5}
+.chk li::before{content:"\2713";color:var(--pink);font-weight:800}
+.det{border:2px solid var(--rule);border-radius:16px;background:var(--panel);overflow:hidden}
+.det div{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 22px;border-bottom:1px solid var(--rule)}
+.det div:last-child{border-bottom:0}
+.det .k{font-weight:800;font-size:.75rem;letter-spacing:2px}
+.det .v{font-weight:800;text-align:right}
+.more{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px}
+.more a{border:1px solid var(--line);border-radius:16px;aspect-ratio:16/9;background:var(--panel);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-decoration:none;transition:transform .2s ease}
+.more a:hover{transform:translateY(-4px)}
+.more .k{color:var(--cyan);font-weight:800;letter-spacing:2px;font-size:.75rem}
+.more .t{font-family:'Bungee',Impact,sans-serif;font-size:1.35rem}
+.gone{text-align:center;padding:64px 0;color:var(--muted)}
+.gone h1{margin-bottom:.4em}
+.lb{position:fixed;inset:0;z-index:60;background:rgba(10,4,24,.9);display:flex;align-items:flex-start;justify-content:center;padding:56px 16px 16px}
+.lb .box{width:100%;max-width:860px;background:var(--panel);border:2px solid var(--line);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:12px;box-shadow:0 30px 80px rgba(0,0,0,.7)}
+.lb .bar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.lb .bar .t{font-family:'Bungee',Impact,sans-serif;font-size:1.1rem}
+.lb .ctl{display:flex;gap:8px;align-items:center}
+.lb .ctl button{width:40px;height:40px;border-radius:10px;border:2px solid var(--line);background:var(--hover);color:var(--text);font-size:1.3rem;line-height:1;cursor:pointer}
+.lb .ctl span{color:var(--muted);font-weight:800;min-width:48px;text-align:center}
+.lb .view{height:min(70vh,600px);overflow:auto;border-radius:14px;background:radial-gradient(circle at 50% 50%,var(--glow,rgba(255,59,78,.35)),transparent 65%),#12081f}
+.lb .view img{display:block;margin:0 auto;width:100%;height:100%;object-fit:contain;cursor:zoom-in}
+.lb .view.z img{width:220%;height:auto;max-width:none;cursor:zoom-out}
+.lb .cap{color:var(--muted);font-size:.75rem;text-align:center}
+@media(max-width:700px){.side.l .hl,.side.r .hl{flex-direction:row;text-align:left}.stage{padding:18px}.buy .acts{width:100%}.buy .acts a{flex:1;text-align:center}}
+@media(prefers-reduced-motion:reduce){.hero img.cut{animation:none}.more a{transition:none}}
+</style>
+</head>
+<body>
+<div class="announce"><a href="./">SINGLES, SLABS &amp; SEALED IN THE EBAY STORE · ELITE TRAINER BOXES NOW IN →</a></div>
+<header class="hdr"><div class="wrap">
+  <a class="brand" href="https://rod-tcg.com/"><span class="icon" aria-hidden="true">R</span><span class="t">ROD TCG</span></a>
+  <nav class="nav" aria-label="Main">
+    <div class="menu"><a href="https://rod-tcg.com/shop/" aria-current="page">Shop</a>
+      <div class="menu-list"><a href="../">Singles &amp; slabs</a><a href="./">Sealed</a></div></div>
+    <a href="https://rod-tcg.com/about/">About</a>
+    <a href="https://rod-tcg.com/about/#shipping">Shipping</a>
+    <a href="https://rod-tcg.com/about/#contact">Contact</a>
+    <a class="btn" href="https://www.ebay.com/usr/rodtcg">eBay Store</a>
+  </nav>
+</div></header>
+<main class="wrap" id="main"><p class="gone">Loading…</p></main>
+<footer class="ftr"><div class="wrap">
+  <div><a class="t" href="https://rod-tcg.com/">ROD TCG</a><p>Trading Card Company</p></div>
+  <nav class="nav" aria-label="Footer">
+    <a href="../">Singles &amp; slabs</a><a href="./">Sealed</a><a href="https://rod-tcg.com/about/">About</a><a href="https://rod-tcg.com/about/#shipping">Shipping</a><a href="https://rod-tcg.com/about/#contact">Contact</a>
+  </nav>
+  <div><p><a href="https://www.ebay.com/usr/rodtcg">ROD TCG on eBay</a> · <a href="https://www.instagram.com/rodtcg_/">@rodtcg_ on Instagram</a></p><p>© 2026 ROD TCG · Not affiliated with or endorsed by The Pokémon Company.</p></div>
+</div></footer>
+
+<script>
+(function(){
+  var main=document.getElementById("main");
+  var id=new URLSearchParams(location.search).get("id")||"";
+  function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(m){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]})}
+  function price(c){var n=parseFloat(c.listPrice);return isNaN(n)?Infinity:n}
+  function money(c){var n=parseFloat(c.listPrice);return isNaN(n)?"See listing":"$"+n.toFixed(2)}
+  function size(u,s){return (u||"").replace(/s-l\d+\./,"s-l"+s+".")}
+
+  function gone(){
+    document.title="No longer listed | ROD TCG";
+    main.innerHTML='<div class="crumbs"><a href="https://rod-tcg.com/shop/">Shop</a> / <a href="./">Sealed</a></div>'
+      +'<div class="gone"><h1 class="disp">This one is <span style="color:var(--pink)">gone</span></h1><p>It sold or is no longer listed. See what else is sealed and ready to ship.</p>'
+      +'<p class="cta" style="padding:12px 0 0"><a href="./">Shop sealed</a></p></div>';
+  }
+
+  function page(c,copies,x){
+    var name=c.name||"Sealed product",top=x.titleTop,bottom=x.titleBottom;
+    if(!top&&!bottom){top=c.set||"";bottom=(c.productType||name).replace(top,"").trim()||name}
+    document.title=name+" | ROD TCG";
+    if(x.accent)document.documentElement.style.setProperty("--accent",x.accent);
+    if(x.glow)document.documentElement.style.setProperty("--glow",x.glow);
+    var photos=(c.photos&&c.photos.length?c.photos:[c.photoUrl,c.backPhotoUrl]).filter(Boolean);
+    var hl=x.highlights||[],half=Math.ceil(hl.length/2);
+    function hlBox(h){return '<div class="hl">'+(h.img?'<div class="im"><img src="'+esc(h.img)+'" alt="" loading="lazy"></div>':'')
+      +'<div class="tx"><div class="n">'+esc(h.n)+'</div><div class="l">'+esc(h.label)+'</div></div></div>'}
+    var sorted=copies.slice().sort(function(a,b){return price(a)-price(b)}),best=sorted[0];
+    var varies=copies.length>1&&price(sorted[0])!==price(sorted[sorted.length-1]);
+    var heroImg=x.hero?'<img class="cut" src="'+esc(x.hero)+'" alt="'+esc(name)+'">'
+      :(photos[0]?'<img class="photo" src="'+esc(size(photos[0],1600))+'" alt="'+esc(name)+'">':'');
+    main.innerHTML=
+      '<div class="crumbs"><a href="https://rod-tcg.com/shop/">Shop</a> / <a href="./">Sealed</a> / '+esc(name)+'</div>'
+      +'<div class="top"><h1>'+esc(top)+(top?'<br>':'')+'<span>'+esc(bottom)+'</span></h1>'
+      +(x.blurb?'<p class="blurb">'+esc(x.blurb)+'</p>':'')+'</div>'
+      +'<div class="stage">'
+        +(hl.length?'<div class="side l">'+hl.slice(0,half).map(hlBox).join("")+'</div>':'')
+        +'<div class="center"><button class="hero" type="button" data-i="0" aria-label="Zoom listing photos">'+heroImg+'</button>'
+        +(photos.length?'<div class="hint">Tap a listing photo to zoom</div><div class="thumbs">'+photos.map(function(p,i){return '<button type="button" data-i="'+i+'" aria-label="Listing photo '+(i+1)+'"><img src="'+esc(size(p,225))+'" alt="" loading="lazy"></button>'}).join("")+'</div>':'')
+        +'</div>'
+        +(hl.length>half?'<div class="side r">'+hl.slice(half).map(hlBox).join("")+'</div>':'')
+      +'</div>'
+      +'<div class="buy"><div><div class="k">FACTORY SEALED'+(copies.length>1?' · '+copies.length+' AVAILABLE':'')+'</div><div class="v">'+(varies?"From ":"")+money(best)+'</div></div>'
+      +'<div class="acts"><a class="go" href="'+esc(best.ebayUrl)+'" target="_blank" rel="noopener">Buy on eBay →</a><a class="back" href="./">Back to sealed</a></div></div>'
+      +'<div class="cols">'
+        +(x.contents&&x.contents.length?'<div><h2>Full contents</h2><ul class="chk">'+x.contents.map(function(t){return '<li>'+esc(t)+'</li>'}).join("")+'</ul></div>':'')
+        +'<div style="align-self:flex-start"><h2>Buying details</h2><div class="det">'
+        +'<div><span class="k" style="color:var(--pink)">CHECKOUT</span><span class="v">Through eBay</span></div>'
+        +'<div><span class="k" style="color:var(--cyan)">PROTECTION</span><span class="v">eBay buyer protection</span></div>'
+        +'<div><span class="k" style="color:var(--pink)">SHIPPING</span><span class="v">Shown at eBay checkout</span></div>'
+        +'</div></div>'
+      +'</div>'
+      +'<div><h2 style="font-size:2rem">More from ROD TCG</h2><div class="more">'
+        +'<a href="./"><span class="k">SEALED</span><span class="t">All sealed</span><b>Browse →</b></a>'
+        +'<a href="../?type=raw"><span class="k">SINGLES</span><span class="t">Shop cards</span><b>Browse →</b></a>'
+        +'<a href="../?type=slab"><span class="k">SLABS</span><span class="t">Graded cards</span><b>Browse →</b></a>'
+      +'</div></div>';
+
+    // listing-photo zoom
+    var lb=null,cur=0,zoom=false;
+    function show(){
+      lb.querySelector(".t").textContent="Photo "+(cur+1)+" of "+photos.length;
+      var v=lb.querySelector(".view");v.classList.toggle("z",zoom);v.querySelector("img").src=size(photos[cur],1600);
+      lb.querySelector(".zl").textContent=zoom?"220%":"100%";
+    }
+    function open(i){
+      if(!photos.length)return;
+      cur=i;zoom=false;
+      lb=document.createElement("div");lb.className="lb";lb.setAttribute("role","dialog");lb.setAttribute("aria-modal","true");lb.setAttribute("aria-label",name+" photos");
+      lb.innerHTML='<div class="box"><div class="bar"><div class="t"></div><div class="ctl">'
+        +'<button type="button" class="zo" aria-label="Zoom out">&minus;</button><span class="zl"></span><button type="button" class="zi" aria-label="Zoom in">+</button>'
+        +'<button type="button" class="pv" aria-label="Previous photo">&lsaquo;</button><button type="button" class="nx" aria-label="Next photo">&rsaquo;</button>'
+        +'<button type="button" class="x" aria-label="Close">&times;</button></div></div>'
+        +'<div class="view"><img alt="'+esc(name)+' listing photo"></div><div class="cap">Click the photo or use +/&minus; to zoom, scroll to pan</div></div>';
+      document.body.appendChild(lb);document.body.style.overflow="hidden";show();
+      lb.addEventListener("click",function(e){
+        var b=e.target.closest("button");
+        if(e.target===lb||(b&&b.classList.contains("x")))return close();
+        if(b&&b.classList.contains("zi")){zoom=true;show()}
+        else if(b&&b.classList.contains("zo")){zoom=false;show()}
+        else if(b&&b.classList.contains("pv")){cur=(cur-1+photos.length)%photos.length;zoom=false;show()}
+        else if(b&&b.classList.contains("nx")){cur=(cur+1)%photos.length;zoom=false;show()}
+        else if(e.target.tagName==="IMG"){zoom=!zoom;show()}
+      });
+      lb.querySelector(".x").focus();
+    }
+    function close(){if(!lb)return;lb.remove();lb=null;document.body.style.overflow=""}
+    document.addEventListener("keydown",function(e){
+      if(!lb)return;
+      if(e.key==="Escape")close();
+      else if(e.key==="ArrowRight"){cur=(cur+1)%photos.length;zoom=false;show()}
+      else if(e.key==="ArrowLeft"){cur=(cur-1+photos.length)%photos.length;zoom=false;show()}
+    });
+    main.addEventListener("click",function(e){var b=e.target.closest(".hero,.thumbs button");if(b)open(+b.getAttribute("data-i")||0)});
+  }
+
+  Promise.all([
+    fetch("../cards.json?v="+Date.now()).then(function(r){return r.json()}),
+    fetch("products.json?v="+Date.now()).then(function(r){return r.json()}).catch(function(){return {}})
+  ]).then(function(res){
+    var sealed=(res[0].cards||[]).filter(function(c){return c.kind==="sealed"});
+    var c=sealed.filter(function(x){return String(x.ebayItemId)===id})[0];
+    if(!c)return gone();
+    var k=String(c.name||"").trim().toLowerCase();
+    var copies=sealed.filter(function(x){return String(x.name||"").trim().toLowerCase()===k});
+    page(c,copies,(res[1]||{})[c.name]||{});
+  }).catch(function(){main.innerHTML='<p class="gone">Couldn\'t load this product. Please refresh, or <a href="https://www.ebay.com/usr/rodtcg">see every listing on eBay</a>.</p>'});
+})();
+</script>
+</body>
+</html>

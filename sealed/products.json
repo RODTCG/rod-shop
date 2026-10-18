@@ -1,0 +1,31 @@
+{
+ "_note": "Extra detail for sealed product pages, keyed by the product name the shop shows (from the eBay title, or overrides.json). Price, photos and the Buy link always come from the live eBay listing in cards.json. Images are paths inside /sealed/. A product with no entry here still gets a page built from its listing photos.",
+ "Destined Rivals Elite Trainer Box": {
+  "titleTop": "Destined Rivals",
+  "titleBottom": "Elite Trainer Box",
+  "accent": "#FF3B4E",
+  "glow": "rgba(255,59,78,.5)",
+  "hero": "img/destined-rivals-etb.webp",
+  "blurb": "Nine Destined Rivals booster packs, a full-art foil promo and everything you need to sleeve up and start playing, all in one box. It's factory sealed and ships from our shop with the same care we give every card, so it's ready to rip open at your kitchen table. Perfect for the collector who loves the thrill of the pull, or anyone starting their first collection.",
+  "highlights": [
+   {"n": "9", "label": "Booster packs", "img": "img/destined-rivals-packs.webp"},
+   {"n": "1", "label": "Full-art foil promo", "img": "img/destined-rivals-promo.webp"},
+   {"n": "65", "label": "Card sleeves"},
+   {"n": "45", "label": "Energy cards"},
+   {"n": "6+1", "label": "Dice"},
+   {"n": "4", "label": "Box dividers"}
+  ],
+  "contents": [
+   "9 Scarlet & Violet: Destined Rivals booster packs",
+   "1 full-art foil promo card featuring Team Rocket's Wobbuffet",
+   "65 card sleeves",
+   "45 Pokémon TCG Energy cards",
+   "1 Player's Guide to the Destined Rivals expansion",
+   "6 damage-counter dice",
+   "1 competition-legal coin-flip die",
+   "2 plastic condition markers",
+   "1 collector's box with 4 dividers",
+   "1 code card for Pokémon Trading Card Game Live"
+  ]
+ }
+}
