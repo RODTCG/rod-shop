@@ -169,6 +169,18 @@ jobs:
               return grader, grade
 
 
+          def quantity(d):
+              """Copies still for sale in one listing (a listing with quantity 3 -> 3). None when eBay doesn't say."""
+              for a in d.get("estimatedAvailabilities") or []:
+                  for k in ("estimatedAvailableQuantity", "estimatedRemainingQuantity"):
+                      if isinstance(a.get(k), int):
+                          return a[k]
+              return None
+
+
+          QTY_PER_RUN = 300   # item lookups per run for quantities; above this the shop is checked in rotating slices
+
+
           def from_ebay(s, d):
               lid = legacy(s)
               a = {x.get("name", "").lower(): x.get("value", "") for x in d.get("localizedAspects", [])}
@@ -226,15 +238,24 @@ jobs:
               if not listings and len(by_id) >= 3:
                   sys.exit(f"eBay returned 0 active listings but the shop has {len(by_id)}; not touching cards.json.")
               cards, added, skipped = [], [], []
+              # Quantity (e.g. 3 copies in one listing) is only in the per-item call. Every listing is checked each run
+              # (~250 calls x 8 runs/day, eBay allows 5,000/day); a bigger shop is checked in slices so a run stays under QTY_PER_RUN.
+              slices = max(1, -(-len(listings) // QTY_PER_RUN))
+              slot = (datetime.now(timezone.utc).hour // 3) % slices
               for s in listings:
                   lid = legacy(s)
                   if not lid:
                       continue
                   prev = by_id.get(lid)
+                  qty = None
                   if prev is not None:
-                      # Known card: price, front photo and extra photos all come with the search results,
-                      # so skip the per-item detail call (it was ~175 calls/run against eBay's 5,000/day limit).
+                      # Known card: price and photos come with the search results; only the quantity needs the item call.
                       d = {}
+                      if int(lid) % slices == slot:
+                          try:
+                              qty = quantity(get(tok, f"/buy/browse/v1/item/{urllib.parse.quote(s['itemId'], safe='')}"))
+                          except Exception as ex:
+                              print(f"quantity check failed for {lid}: {ex}", file=sys.stderr)
                   else:
                       try:
                           d = get(tok, f"/buy/browse/v1/item/{urllib.parse.quote(s['itemId'], safe='')}")
@@ -244,6 +265,8 @@ jobs:
                   if d is None and prev is None:
                       skipped.append(lid)          # new listing without details: pick it up next run
                       continue
+                  if d:
+                      qty = quantity(d)
                   owned, fill = from_ebay(s, d or {})
                   if d is None:                    # keep the old price/photo rather than a partial value
                       owned = {k: prev.get(k) for k in owned} | {"listPrice": owned["listPrice"] or prev.get("listPrice")}
@@ -256,6 +279,9 @@ jobs:
                       if fill.get(k) and (not card.get(k) or (k == "rarity" and card.get(k) == "Other" and fill[k] != "Other")):
                           card[k] = fill[k]
                   card.update({k: v for k, v in owned.items() if v not in (None, "")})
+                  if qty is not None:                  # only kept when more than 1, so single listings stay unchanged
+                      if qty > 1: card["quantity"] = qty
+                      else: card.pop("quantity", None)
                   card.update(overrides.get(lid, {}))   # hand corrections in overrides.json always win
                   cards.append({k: v for k, v in card.items() if v not in (None, "")})
                   if prev is None:

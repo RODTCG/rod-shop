@@ -9,7 +9,7 @@ import json, sys
 from datetime import datetime, timezone
 
 KEEP = ["name", "number", "set", "rarity", "condition", "grader", "grade", "kind", "productType", "photos", "listPrice", "ebayUrl",
-        "photoUrl", "backPhotoUrl", "listedAt", "listedDate", "ebayItemId"]
+        "photoUrl", "backPhotoUrl", "listedAt", "listedDate", "ebayItemId", "quantity"]
 
 def main():
     src = sys.argv[1]
@@ -20,7 +20,10 @@ def main():
         c = d.get("data", d)
         if c.get("status") != "listed" or not c.get("ebayUrl"):
             continue
-        cards.append({k: c[k] for k in KEEP if c.get(k) not in (None, "")})
+        card = {k: c[k] for k in KEEP if c.get(k) not in (None, "")}
+        if (card.get("quantity") or 0) <= 1:   # quantity only shown when one listing holds 2+ copies
+            card.pop("quantity", None)
+        cards.append(card)
     cards.sort(key=lambda c: c.get("listedAt") or "", reverse=True)
     out = {"updated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), "cards": cards}
     json.dump(out, open(dst, "w"), separators=(",", ":"))

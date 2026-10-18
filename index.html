@@ -336,6 +336,8 @@ h1{font-family:'Bungee',Impact,sans-serif;font-weight:400;font-size:clamp(2.25re
   function isSlab(c){return c.condition==="Graded"}
   function rarityOf(c){return isSlab(c)?(c.rarity||""):(c.rarity||"Other")}
   function typeOf(c){return isSlab(c)?(c.grader||"Graded"):"Raw"}
+  function qtyOf(c){var n=parseInt(c.quantity,10);return n>1?n:1}
+  function copies(g){return g.reduce(function(a,c){return a+qtyOf(c)},0)}
   function price(c){var n=parseFloat(c.listPrice);return isNaN(n)?Infinity:n}
   function money(c){var n=parseFloat(c.listPrice);return isNaN(n)?"See listing":"$"+n.toFixed(2)}
   function img(u){return (u||"").replace(/s-l\d+\./,"s-l500.")}
@@ -386,7 +388,7 @@ h1{font-family:'Bungee',Impact,sans-serif;font-weight:400;font-size:clamp(2.25re
 
   function tile(g){
     var c=g[0],slab=isSlab(c),sorted=g.slice().sort(function(a,b){return price(a)-price(b)}),best=sorted[0];
-    var multi=g.length>1,varies=multi&&price(sorted[0])!==price(sorted[sorted.length-1]);
+    var multi=g.length>1,total=copies(g),varies=multi&&price(sorted[0])!==price(sorted[sorted.length-1]);
     var cond=slab?[c.grader,c.grade].filter(Boolean).join(" ")||"Graded":(COND[c.condition]||c.condition||"");
     var rar=rarityOf(c);
     var pills='<span class="pill c">'+esc(cond)+'</span>'+(rar?'<span class="pill">'+esc(lab(rar))+'</span>':'');
@@ -394,12 +396,12 @@ h1{font-family:'Bungee',Impact,sans-serif;font-weight:400;font-size:clamp(2.25re
     var alt=esc(c.name+" "+(c.number||""));
     var pic='<span class="tilt"><span class="in"><span class="face">'+(c.photoUrl?photo(c.photoUrl,c.name+" "+(c.number||"")+" front",1):'')+'</span>'
       +(hasBack?'<span class="face bk">'+photo(c.backPhotoUrl,c.name+" "+(c.number||"")+" back",1)+'</span>':'')+'</span></span>'
-      +(multi?'<span class="qty">&times;'+g.length+'</span>':'');
+      +(total>1?'<span class="qty">&times;'+total+'</span>':'');
     var meta=[c.set,c.number].filter(Boolean).join(" \u00b7 ");
     var bottom='';
     if(multi){
       bottom+='<button type="button" class="more" aria-expanded="false">'+g.length+' listings available \u25BE</button><div class="opts">'
-        +sorted.map(function(x,i){return '<a href="'+esc(x.ebayUrl)+'" target="_blank" rel="noopener">#'+(i+1)+(varies?' \u00b7 '+money(x):'')+'</a>'}).join("")+'</div>';
+        +sorted.map(function(x,i){return '<a href="'+esc(x.ebayUrl)+'" target="_blank" rel="noopener">#'+(i+1)+(varies?' \u00b7 '+money(x):'')+(qtyOf(x)>1?' \u00b7 \u00d7'+qtyOf(x):'')+'</a>'}).join("")+'</div>';
     }
     return '<div class="tile"><a class="pic'+(slab?' slab':'')+(hasBack?' hasback':'')+'" href="'+esc(best.ebayUrl)+'" target="_blank" rel="noopener" data-k="'+esc(key(c))+'" aria-label="'+esc(c.name)+': view larger">'+pic+'</a>'
       +'<div class="pills">'+pills+'</div><a class="name" href="'+esc(best.ebayUrl)+'" target="_blank" rel="noopener">'+esc(c.name)+'</a><div class="info"><span class="s">'+esc(meta)+'</span><span class="p">'+(varies?"From ":"")+money(best)+'</span></div>'+bottom+'</div>';
