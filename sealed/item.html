@@ -39,6 +39,9 @@ h1 span{color:var(--accent,var(--pink))}
 .buy{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:20px;border:2px solid var(--cyan);border-radius:20px;background:var(--panel);padding:22px 28px}
 .buy .k{color:var(--muted);font-size:.8rem;letter-spacing:2px;font-weight:800}
 .buy .v{font-weight:800;font-size:clamp(2.2rem,5vw,3.25rem);line-height:1.1}
+.buy .stock{margin-top:.5rem;font-size:.9rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.buy .stock.low{color:#FF4F9A}
+.buy .stock.low::before{content:"";display:inline-block;width:.55em;height:.55em;border-radius:50%;background:#FF4F9A;margin-right:.5em;vertical-align:.06em;box-shadow:0 0 0 3px rgba(255,79,154,.25)}
 .buy .acts{display:flex;flex-wrap:wrap;gap:12px}
 .buy .acts a{text-decoration:none;font-weight:800;border-radius:14px;padding:16px 28px;font-size:1.1rem}
 .buy .go{background:var(--pink);color:var(--bg);font-size:1.2rem!important;padding:18px 36px!important}
@@ -103,6 +106,10 @@ h2{font-family:'Bungee',Impact,sans-serif;font-weight:400;margin:0 0 12px;font-s
   var main=document.getElementById("main");
   var id=new URLSearchParams(location.search).get("id")||"";
   function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(m){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]})}
+  function qtyOf(c){var n=parseInt(c.quantity,10);return n>1?n:1}
+  // Stock note for sealed: "Last one" / "Only 4 left" while 5 or fewer, "12 in stock" above that
+  function stock(g){var n=g.reduce(function(a,c){return a+qtyOf(c)},0);return n<=1?"Last one":n<=5?"Only "+n+" left":n+" in stock"}
+  function stockLow(g){return g.reduce(function(a,c){return a+qtyOf(c)},0)<=5}
   function price(c){var n=parseFloat(c.listPrice);return isNaN(n)?Infinity:n}
   function money(c){var n=parseFloat(c.listPrice);return isNaN(n)?"See listing":"$"+n.toFixed(2)}
   function size(u,s){return (u||"").replace(/s-l\d+\./,"s-l"+s+".")}
@@ -139,7 +146,8 @@ h2{font-family:'Bungee',Impact,sans-serif;font-weight:400;margin:0 0 12px;font-s
         +'</div>'
         +(hl.length>half?'<div class="side r">'+hl.slice(half).map(hlBox).join("")+'</div>':'')
       +'</div>'
-      +'<div class="buy"><div><div class="k">FACTORY SEALED'+(copies.length>1?' · '+copies.length+' AVAILABLE':'')+'</div><div class="v">'+(varies?"From ":"")+money(best)+'</div></div>'
+      +'<div class="buy"><div><div class="k">FACTORY SEALED</div><div class="v">'+(varies?"From ":"")+money(best)+'</div>'
+      +'<div class="stock'+(stockLow(copies)?' low':'')+'">'+stock(copies)+'</div></div>'
       +'<div class="acts"><a class="go" href="'+esc(best.ebayUrl)+'" target="_blank" rel="noopener">Buy on eBay →</a><a class="back" href="./">Back to sealed</a></div></div>'
       +'<div class="cols">'
         +(x.contents&&x.contents.length?'<div><h2>Full contents</h2><ul class="chk">'+x.contents.map(function(t){return '<li>'+esc(t)+'</li>'}).join("")+'</ul></div>':'')
