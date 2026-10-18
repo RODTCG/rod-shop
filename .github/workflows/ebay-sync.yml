@@ -1,10 +1,10 @@
 name: Sync shop with eBay
 # Keeps cards.json (the shop at shop.rod-tcg.com) matching the rodtcg ACTIVE eBay listings.
-# Runs every 5 hours (00:17, 05:17, 10:17, 15:17, 20:17 UTC) and on demand (Actions tab > Sync shop with eBay > Run workflow).
+# Runs every 3 hours and on demand (Actions tab > Sync shop with eBay > Run workflow).
 # Needs repo secret EBAY_KEYS (the whole ebay_keys note), or EBAY_CLIENT_ID + EBAY_CLIENT_SECRET. Only cards.json is ever changed.
 on:
   schedule:
-    - cron: "17 */5 * * *"
+    - cron: "17 */3 * * *"
   workflow_dispatch:
 permissions:
   contents: write
