@@ -151,7 +151,7 @@ h1{font-family:'Bungee',Impact,sans-serif;font-weight:400;font-size:clamp(2.25re
   </div>
 
   <div class="meta"><span id="count">Loading…</span><button id="clear" hidden>Clear filters</button></div>
-  <div class="grid" id="grid"></div>
+  <div class="grid" id="grid"></div><div id="more-sentinel" aria-hidden="true" style="height:1px"></div>
   <p class="empty" id="empty">No cards match those filters.</p>
   <p class="cta"><a href="https://www.ebay.com/usr/rodtcg">See every listing on eBay</a></p>
 </div>
@@ -405,17 +405,30 @@ h1{font-family:'Bungee',Impact,sans-serif;font-weight:400;font-size:clamp(2.25re
       +'<div class="pills">'+pills+'</div><a class="name" href="'+esc(best.ebayUrl)+'" target="_blank" rel="noopener">'+esc(c.name)+'</a><div class="info"><span class="s">'+esc(meta)+'</span><span class="p">'+(varies?"From ":"")+money(best)+'</span></div>'+bottom+'</div>';
   }
 
+  var PAGE=24,cur=[],shown=0,sentinel=$("more-sentinel");
+  function showMore(){
+    if(shown>=cur.length)return;
+    var next=cur.slice(shown,shown+PAGE);shown+=next.length;
+    grid.insertAdjacentHTML("beforeend",next.map(tile).join(""));
+  }
+  function fillIfShort(){if(shown<cur.length&&sentinel.getBoundingClientRect().top<innerHeight+600)requestAnimationFrame(function(){showMore();fillIfShort()})}
+  if("IntersectionObserver" in window)new IntersectionObserver(function(es){if(es[0].isIntersecting){showMore();fillIfShort()}},{rootMargin:"0px 0px 600px 0px"}).observe(sentinel);
+  else addEventListener("scroll",function(){fillIfShort()},{passive:true});
+
   function render(){
     var list=groups.filter(matches),s=selSort.value||"new";
     if(s==="low")list.sort(function(a,b){return price(a[0])-price(b[0])});
     else if(s==="high")list.sort(function(a,b){return price(b[0])-price(a[0])});
     else if(s==="name")list.sort(function(a,b){return a[0].name.localeCompare(b[0].name)});
     else list.sort(function(a,b){return (b[0].listedAt||"").localeCompare(a[0].listedAt||"")});
-    grid.innerHTML=list.map(tile).join("");
+    var active=q.value||selR.value||selS.value||selT.value;
+    // No filter: show the first PAGE cards and add more as the visitor scrolls. Any filter or search: show every match at once.
+    cur=list;shown=active?list.length:Math.min(PAGE,list.length);
+    grid.innerHTML=list.slice(0,shown).map(tile).join("");
     var n=list.reduce(function(a,g){return a+g.length},0);
     $("count").textContent=list.length+" card"+(list.length===1?"":"s")+(n!==list.length?" ("+n+" listings)":"");
     $("empty").style.display=list.length?"none":"block";
-    var active=q.value||selR.value||selS.value||selT.value;
+    fillIfShort();
     $("clear").hidden=!active;
     var p=new URLSearchParams();
     if(q.value)p.set("q",q.value);if(selR.value)p.set("rarity",selR.value);if(selS.value)p.set("set",selS.value);if(selT.value)p.set("type",selT.value);if(s!=="new")p.set("sort",s);
