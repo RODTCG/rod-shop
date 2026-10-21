@@ -59,11 +59,13 @@
   "highlights": [
    {
     "n": "11",
-    "label": "Booster packs"
+    "label": "Booster packs",
+    "img": "img/prismatic-packs.webp"
    },
    {
     "n": "2",
-    "label": "Etched foil promos"
+    "label": "Etched foil promos",
+    "img": "img/prismatic-promos.webp"
    },
    {
     "n": "1",
