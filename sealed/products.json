@@ -48,13 +48,48 @@
    "1 code card for Pokémon Trading Card Game Live"
   ]
  },
- "_upcoming": [
-  {
-   "name": "Prismatic Evolutions Premium Figure Collection",
-   "set": "Prismatic Evolutions",
-   "productType": "Premium Collection",
-   "hero": "img/prismatic-premium-figure-collection.webp",
-   "glow": "rgba(34,211,238,.38)"
-  }
- ]
+ "_upcoming": [],
+ "Prismatic Evolutions Premium Figure Collection": {
+  "titleTop": "Prismatic Evolutions",
+  "titleBottom": "Premium Figure Collection",
+  "accent": "#22D3EE",
+  "glow": "rgba(34,211,238,.38)",
+  "hero": "img/prismatic-premium-figure-collection.webp",
+  "blurb": "Eleven Prismatic Evolutions booster packs, two etched foil promos of Espeon ex and Umbreon ex, and a display figure of the pair, all in one box. It's factory sealed and ships from our shop with the same care we give every card. A showpiece for any Eevee fan, and plenty of packs to chase the set's best pulls.",
+  "highlights": [
+   {
+    "n": "11",
+    "label": "Booster packs"
+   },
+   {
+    "n": "2",
+    "label": "Etched foil promos"
+   },
+   {
+    "n": "1",
+    "label": "Espeon & Umbreon figure"
+   },
+   {
+    "n": "1",
+    "label": "Collector's pin"
+   },
+   {
+    "n": "65",
+    "label": "Card sleeves"
+   },
+   {
+    "n": "1",
+    "label": "TCG Live code card"
+   }
+  ],
+  "contents": [
+   "11 Scarlet & Violet: Prismatic Evolutions booster packs",
+   "1 etched foil promo card featuring Espeon ex",
+   "1 etched foil promo card featuring Umbreon ex",
+   "1 figure featuring Espeon and Umbreon",
+   "1 pin featuring Espeon and Umbreon",
+   "65 card sleeves featuring Espeon and Umbreon",
+   "1 code card for Pokémon Trading Card Game Live"
+  ]
+ }
 }
