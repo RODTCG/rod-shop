@@ -1,0 +1,19 @@
+name = "rod-reveal"
+main = "src/worker.js"
+compatibility_date = "2026-10-01"
+workers_dev = true
+
+# Optional: the address shown in the eBay message ("Enter it at ...").
+# Leave unset to use this Worker's own address; set it once the page has a nicer one.
+# [vars]
+# REVEAL_URL = "https://reveal.rod-tcg.com"
+
+[[durable_objects.bindings]]
+name = "REVEAL"
+class_name = "RevealStore"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["RevealStore"]
+
+# The admin password is a secret, never in this file:  npx wrangler secret put ADMIN_SECRET

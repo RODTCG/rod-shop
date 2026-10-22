@@ -1,0 +1,66 @@
+name: Deploy mystery reveal page
+# Tests and deploys reveal/ (the Mystery Hit / Mystery Slab code-reveal page) to Cloudflare Workers.
+# Runs on every push to the mystery-reveal branch. To deploy again without a change, open the latest run
+# in the Actions tab and click "Re-run all jobs".
+# Needs three repository secrets (Settings > Secrets and variables > Actions):
+#   CLOUDFLARE_API_TOKEN   token made from the "Edit Cloudflare Workers" template
+#   CLOUDFLARE_ACCOUNT_ID  shown on the Cloudflare dashboard (Workers & Pages page)
+#   REVEAL_ADMIN_PASSWORD  any password of 12+ characters; it unlocks the /admin page
+on:
+  push:
+    branches: [mystery-reveal]
+    paths: ["reveal/**", ".github/workflows/deploy-reveal.yml"]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: deploy-reveal
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: reveal
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install
+        run: npm ci
+      - name: Test
+        run: npm test
+      - name: Check secrets
+        id: keys
+        env:
+          T: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          A: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          S: ${{ secrets.REVEAL_ADMIN_PASSWORD }}
+        run: |
+          missing=""
+          [ -n "$T" ] || missing="$missing CLOUDFLARE_API_TOKEN"
+          [ -n "$A" ] || missing="$missing CLOUDFLARE_ACCOUNT_ID"
+          [ -n "$S" ] || missing="$missing REVEAL_ADMIN_PASSWORD"
+          if [ -n "$S" ] && [ ${#S} -lt 12 ]; then missing="$missing REVEAL_ADMIN_PASSWORD(needs 12+ characters)"; fi
+          if [ -n "$missing" ]; then
+            echo "::warning::Tests passed but nothing was deployed. Add these repository secrets, then re-run this workflow:$missing"
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Deploy to Cloudflare
+        if: steps.keys.outputs.ready == 'true'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          ADMIN_PASSWORD: ${{ secrets.REVEAL_ADMIN_PASSWORD }}
+        run: |
+          npx wrangler deploy | tee deploy.log
+          printf '%s' "$ADMIN_PASSWORD" | npx wrangler secret put ADMIN_SECRET
+          url=$(grep -oE 'https://[a-z0-9.-]+\.workers\.dev' deploy.log | head -1)
+          {
+            echo "### Mystery reveal page is live"
+            echo "- Reveal page: ${url:-see the deploy log above}"
+            echo "- Admin page: ${url:+$url/admin}"
+          } >> "$GITHUB_STEP_SUMMARY"
