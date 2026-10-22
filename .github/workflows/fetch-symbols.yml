@@ -33,10 +33,25 @@ jobs:
           fetch paldea-evolved paldea-evolved https://images.pokemontcg.io/sv2/symbol.png
           fetch prismatic-evolutions prismatic-evolutions https://images.pokemontcg.io/sv8pt5/symbol.png
           fetch shrouded-fable shrouded-fable https://images.pokemontcg.io/sv6pt5/symbol.png
-          fetch trick-or-trade trick-or-trade trick-or-trade-2024 trick-or-trade-2023 trick-or-trade-2022
+          fetch trick-or-trade trick-or-trade trick-or-trade-2024 trick-or-trade-2023 trick-or-trade-2022 trick-or-trade-booster trick-or-trade-booster-bundle
+          fetch 151 151 scarlet-violet-151 sv-151 https://images.pokemontcg.io/sv3pt5/symbol.png
+          fetch battle-styles battle-styles https://images.pokemontcg.io/swsh5/symbol.png
+          fetch brilliant-stars brilliant-stars https://images.pokemontcg.io/swsh9/symbol.png
+          fetch celebrations celebrations https://images.pokemontcg.io/cel25/symbol.png
+          fetch crown-zenith crown-zenith https://images.pokemontcg.io/swsh12pt5/symbol.png
+          fetch destined-rivals destined-rivals https://images.pokemontcg.io/sv10/symbol.png
+          fetch evolving-skies evolving-skies https://images.pokemontcg.io/swsh7/symbol.png
+          fetch lost-origin lost-origin https://images.pokemontcg.io/swsh11/symbol.png
+          fetch obsidian-flames obsidian-flames https://images.pokemontcg.io/sv3/symbol.png
+          fetch scarlet-and-violet scarlet-and-violet scarlet-violet https://images.pokemontcg.io/sv1/symbol.png
+          fetch silver-tempest silver-tempest https://images.pokemontcg.io/swsh12/symbol.png
+          fetch vivid-voltage vivid-voltage https://images.pokemontcg.io/swsh4/symbol.png
           ls -la symbols
           mkdir -p rarities
           for r in special-illustration-rare illustration-rare mega-attack-rare ultra-rare ace-spec-rare double-rare rare uncommon common; do curl -fsSL "https://pokesymbols.com/images/tcg/rarities/$r.png" -o "rarities/$r.png" || echo "FAILED $r"; done
+          # Radiant Rare: try the likely pokesymbols names
+          for c in radiant-rare radiant rare-radiant; do curl -fsSL "https://pokesymbols.com/images/tcg/rarities/$c.png" -o rarities/radiant-rare.png && { echo "OK radiant-rare <- $c"; break; }; done || true
+          [ -s rarities/radiant-rare.png ] || { rm -f rarities/radiant-rare.png; echo "FAILED radiant-rare"; }
           ls -la rarities
       - name: Shrink images
         run: |
