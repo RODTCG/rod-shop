@@ -49,9 +49,8 @@ jobs:
           ls -la symbols
           mkdir -p rarities
           for r in special-illustration-rare illustration-rare mega-attack-rare ultra-rare ace-spec-rare double-rare rare uncommon common; do curl -fsSL "https://pokesymbols.com/images/tcg/rarities/$r.png" -o "rarities/$r.png" || echo "FAILED $r"; done
-          # Radiant Rare: try the likely pokesymbols names
-          for c in radiant-rare radiant rare-radiant; do curl -fsSL "https://pokesymbols.com/images/tcg/rarities/$c.png" -o rarities/radiant-rare.png && { echo "OK radiant-rare <- $c"; break; }; done || true
-          [ -s rarities/radiant-rare.png ] || { rm -f rarities/radiant-rare.png; echo "FAILED radiant-rare"; }
+          # Radiant Rare: try the likely pokesymbols names; keep the existing (hand-made) icon if none exists
+          for c in radiant-rare radiant rare-radiant; do curl -fsSL "https://pokesymbols.com/images/tcg/rarities/$c.png" -o /tmp/rr.png && [ -s /tmp/rr.png ] && { mv /tmp/rr.png rarities/radiant-rare.png; echo "OK radiant-rare <- $c"; break; }; done || true
           ls -la rarities
       - name: Shrink images
         run: |
