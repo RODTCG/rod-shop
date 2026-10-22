@@ -1,6 +1,12 @@
 {
-  "940007675522": {"set": "Chaos Rising"},
-  "940007675506": {"set": "Perfect Order"},
-  "940007675557": {"rarity": "Radiant Rare"},
-  "940021497736": {"listPrice": 114.99}
+ "_note": "Corrections from the Sales tracker; applied by .github/workflows/ebay-sync.yml after each eBay pull.",
+ "940007675506": {
+  "set": "Perfect Order"
+ },
+ "940007675522": {
+  "set": "Deck Exclusives"
+ },
+ "940007675557": {
+  "rarity": "Radiant Rare"
+ }
 }
