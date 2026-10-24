@@ -1,0 +1,13 @@
+{
+  "name": "rod-reveal",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --no-warnings test/test.mjs",
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^4.151.3"
+  }
+}

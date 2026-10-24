@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Reveal Your Card | ROD TCG</title>
+<meta name="description" content="Bought a ROD TCG Mystery Hit or Mystery Slab on eBay? Enter your one-time code to reveal your card.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Chivo:wght@400;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<link rel="icon" href="https://rod-tcg.com/wp-content/uploads/2026/10/rod-favicon-512-1.png">
+<link rel="stylesheet" href="../site.css">
+<style>
+h1{font-family:'Bungee',Impact,sans-serif;font-weight:400;font-size:clamp(2.25rem,5.5vw,3.75rem);line-height:1.05;margin:0}
+h1 span{color:var(--pink)}
+h2{font-family:'Bungee',Impact,sans-serif;font-weight:400;font-size:clamp(1.5rem,3.5vw,2rem);line-height:1.15;margin:0}
+.muted{color:var(--muted)}
+.mono{font-family:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace}
+.hero{display:flex;flex-wrap:wrap;gap:40px;align-items:center;padding:28px 0 56px}
+.hero .copy{flex:1 1 420px;min-width:0;display:flex;flex-direction:column;gap:18px}
+.hero .stage{flex:1 1 280px;display:flex;justify-content:center}
+.lead{margin:0;color:var(--muted);font-size:1.0625rem;max-width:30rem}
+form.code{display:flex;flex-direction:column;gap:10px;max-width:30rem}
+form.code label{font-weight:800;font-size:.8125rem;letter-spacing:.12em;color:var(--muted)}
+form.code input{font:500 1.375rem/1.2 'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--text);background:var(--panel);border:2px solid var(--line);border-radius:14px;padding:.8em .9em;width:100%;min-width:0}
+form.code input::placeholder{color:var(--muted);opacity:.7}
+form.code input:focus{outline:none;border-color:var(--cyan)}
+.btn-p{display:inline-flex;align-items:center;justify-content:center;min-height:48px;border:0;border-radius:999px;padding:.8em 1.6em;font:inherit;font-weight:800;cursor:pointer;text-decoration:none;background:var(--pink);color:var(--bg);transition:transform .15s ease,box-shadow .15s ease}
+.btn-p:hover{transform:translateY(-2px);box-shadow:4px 4px 0 var(--cyan)}
+.btn-p:disabled{opacity:.65;cursor:wait;transform:none;box-shadow:none}
+.btn-g{display:inline-flex;align-items:center;justify-content:center;min-height:48px;border-radius:999px;padding:.7em 1.4em;font:inherit;font-weight:800;text-decoration:none;color:var(--text);background:transparent;border:2px solid var(--text);cursor:pointer}
+.btn-l{min-height:48px;background:none;border:0;font:inherit;font-weight:800;color:var(--muted);text-decoration:underline;cursor:pointer;padding:0 6px}
+.err{color:#FFB3CF;font-weight:800;min-height:1.6em;margin:0}
+.hint{font-size:.875rem;color:var(--muted);margin:0}
+.result{display:none;flex-direction:column;gap:14px}
+.result.on{display:flex}
+.tag{align-self:flex-start;background:var(--cyan);color:var(--bg);border-radius:999px;padding:.25em .9em;font-weight:800;font-size:.8125rem;letter-spacing:.06em}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.flip{width:240px;max-width:70vw;aspect-ratio:3/5;perspective:1200px}
+.flip-in{position:relative;width:100%;height:100%;transition:transform .9s cubic-bezier(.2,.8,.2,1);transform-style:preserve-3d}
+.flip.on .flip-in{transform:rotateY(180deg)}
+.flip.shake .flip-in{animation:shake .5s ease-in-out 2}
+@keyframes shake{0%,100%{transform:rotate(0)}25%{transform:rotate(-4deg)}75%{transform:rotate(4deg)}}
+.face{position:absolute;inset:0;border-radius:18px;backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow:hidden;display:flex;flex-direction:column;background:var(--panel)}
+.face .hd{font-weight:800;font-size:.8125rem;letter-spacing:.08em;padding:10px 12px;display:flex;justify-content:space-between;gap:8px}
+.face.front{border:3px solid var(--line);background:radial-gradient(circle at 50% 60%,rgba(255,79,154,.18),transparent 62%),repeating-linear-gradient(115deg,transparent 0 30px,rgba(255,79,154,.08) 30px 60px),var(--panel)}
+.face.front .hd{background:var(--line)}
+.face.front .q{flex:1;display:flex;align-items:center;justify-content:center;font-family:'Bungee',Impact,sans-serif;font-size:110px;color:var(--line)}
+.face.back{transform:rotateY(180deg);border:3px solid var(--pink)}
+.face.back .hd{background:var(--pink);color:var(--bg)}
+.face.back .ph{flex:1;margin:12px;border-radius:10px;background:var(--bg);display:flex;align-items:center;justify-content:center;text-align:center;padding:12px;font-weight:800;overflow:hidden}
+.face.back .ph img{width:100%;height:100%;object-fit:contain}
+.band{background:var(--panel);padding:48px 0;margin-top:8px}
+.pools{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:20px}
+.pool{background:var(--bg);border-radius:18px;padding:22px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.pool .top{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.pool .n{font-family:'Bungee',Impact,sans-serif;font-size:2.25rem;line-height:1.1}
+.pool .n small{font-family:'Chivo',sans-serif;font-size:1rem;color:var(--muted)}
+.meter{height:10px;border-radius:999px;background:var(--line);overflow:hidden}
+.meter>div{height:100%;border-radius:999px;background:var(--pink)}
+.fp-l{font-size:.75rem;font-weight:800;letter-spacing:.1em;color:var(--muted);margin-top:6px}
+.fp{font-size:.8125rem;color:var(--cyan);word-break:break-all}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:16px;margin:0;padding:0;list-style:none;counter-reset:s}
+.steps li{border:1px solid var(--line);border-radius:16px;padding:20px;counter-increment:s;color:var(--muted)}
+.steps li::before{content:counter(s);display:block;font-family:'Bungee',Impact,sans-serif;font-size:2rem;color:var(--pink);line-height:1;margin-bottom:8px}
+.steps b{display:block;color:var(--text);margin-bottom:4px}
+.logbox{overflow-x:auto;border:1px solid var(--line);border-radius:16px;max-width:100%}
+table{width:100%;border-collapse:collapse;min-width:520px}
+th,td{padding:12px 16px;text-align:left;vertical-align:top}
+th{background:var(--panel);font-weight:800}
+tbody td{border-top:1px solid var(--line)}
+.sec{padding:48px 0;display:flex;flex-direction:column;gap:16px}
+@media(prefers-reduced-motion:reduce){.flip-in{transition:none}.flip.shake .flip-in{animation:none}.btn-p{transition:none}}
+</style>
+</head>
+<body>
+<div class="announce"><a href="../">SINGLES, SLABS &amp; SEALED IN THE EBAY STORE · ELITE TRAINER BOXES NOW IN →</a></div>
+<header class="hdr"><div class="wrap">
+  <a class="brand" href="https://rod-tcg.com/"><span class="icon" aria-hidden="true">R</span><span class="t">ROD TCG</span></a>
+  <nav class="nav" aria-label="Main">
+    <div class="menu"><a href="https://rod-tcg.com/shop/">Shop</a>
+      <div class="menu-list"><a href="../">Singles &amp; slabs</a><a href="../sealed/">Sealed</a></div></div>
+    <a href="https://rod-tcg.com/about/">About</a>
+    <a href="https://rod-tcg.com/about/#shipping">Shipping</a>
+    <a href="https://rod-tcg.com/about/#contact">Contact</a>
+    <a class="btn" href="https://www.ebay.com/usr/rodtcg">eBay Store</a>
+  </nav>
+</div></header>
+
+<main>
+<div class="wrap">
+  <div class="crumbs"><a href="https://rod-tcg.com/">Home</a> / <a href="https://rod-tcg.com/shop/">Shop</a> / Reveal</div>
+  <section class="hero">
+    <div class="copy">
+      <div id="enter" style="display:flex;flex-direction:column;gap:18px">
+        <h1>Reveal your <span>card</span></h1>
+        <p class="lead">Bought a Mystery Hit or Mystery Slab? Enter the code from your eBay messages. Each code works once and reveals the next card in its pool.</p>
+        <form class="code" id="form" novalidate>
+          <label for="code">REVEAL CODE</label>
+          <input id="code" name="code" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="ROD-XXXX-XXXX" maxlength="20" required>
+          <button class="btn-p" id="go" type="submit">Reveal my card</button>
+          <p class="err" id="err" role="alert"></p>
+        </form>
+        <p class="hint">No code yet? We send it in eBay messages after checkout, usually within a few hours.</p>
+      </div>
+      <div class="result" id="result" aria-live="polite">
+        <span class="tag" id="r-tag"></span>
+        <h1 style="font-size:clamp(2rem,5vw,3.25rem)">You pulled<br><span id="r-name"></span></h1>
+        <span class="muted" style="font-size:1.125rem" id="r-meta"></span>
+        <span class="muted" id="r-note"></span>
+        <div class="row">
+          <button class="btn-p" type="button" id="share">Share my pull</button>
+          <a class="btn-g" href="https://www.ebay.com/usr/rodtcg">Buy another</a>
+          <button class="btn-l" type="button" id="again">Enter another code</button>
+        </div>
+      </div>
+    </div>
+    <div class="stage">
+      <div class="flip" id="flip" aria-hidden="true"><div class="flip-in">
+        <div class="face front"><div class="hd"><span>ROD TCG · MYSTERY</span></div><div class="q">?</div></div>
+        <div class="face back"><div class="hd"><span id="b-grader"></span><span id="b-grade"></span></div><div class="ph" id="b-ph"></div></div>
+      </div></div>
+    </div>
+  </section>
+</div>
+
+<section class="band"><div class="wrap"><div class="pools" id="pools"><p class="muted" style="margin:0">Loading pools…</p></div></div></section>
+
+<div class="wrap">
+  <section class="sec">
+    <h2>How it works</h2>
+    <ol class="steps">
+      <li><b>Buy on eBay</b>Order a Mystery Hit ($15, raw card) or Mystery Slab ($50, graded) from our eBay store.</li>
+      <li><b>Get your code</b>We send a one-time code like ROD-7KQ2-M9XD in your eBay messages.</li>
+      <li><b>Reveal, then it ships</b>Enter it here to see your card. It ships tracked the next business day.</li>
+    </ol>
+  </section>
+  <section class="sec" style="padding-top:0">
+    <h2>Reveal log</h2>
+    <div class="logbox"><table><thead><tr><th scope="col">When</th><th scope="col">Order</th><th scope="col">Type</th><th scope="col">Card</th></tr></thead><tbody id="log"></tbody></table></div>
+    <p class="hint">Fair draw: every pool is shuffled once and its fingerprint is posted above before the first sale. When a pool sells out we publish its full order and secret, and the Verify button checks it right in your browser.</p>
+  </section>
+</div>
+</main>
+
+<footer class="ftr"><div class="wrap">
+  <div><a class="t" href="https://rod-tcg.com/">ROD TCG</a><p>Trading Card Company</p></div>
+  <nav class="nav" aria-label="Footer">
+    <a href="https://rod-tcg.com/shop/">Shop</a><a href="https://rod-tcg.com/about/">About</a><a href="https://rod-tcg.com/about/#shipping">Shipping</a><a href="https://rod-tcg.com/about/#contact">Contact</a>
+  </nav>
+  <div><p><a href="https://www.ebay.com/usr/rodtcg">ROD TCG on eBay</a> · <a href="https://www.instagram.com/rodtcg_/">@rodtcg_ on Instagram</a></p><p>© 2026 ROD TCG</p></div>
+</div></footer>
+
+<script>
+(function(){
+  // The codes, pools and draws live on ROD TCG's Cloudflare server; this page only talks to it.
+  var API = "https://rod-reveal.rodtcg.workers.dev";
+  var $ = function(id){ return document.getElementById(id); };
+  function el(tag, props, kids){
+    var n = document.createElement(tag); props = props || {};
+    for (var k in props) { if (k === "text") n.textContent = props[k]; else if (k === "style") n.style.cssText = props[k]; else n.setAttribute(k, props[k]); }
+    (kids || []).forEach(function(c){ if (c) n.appendChild(typeof c === "string" ? document.createTextNode(c) : c); });
+    return n;
+  }
+  function when(iso){ try { return new Date(iso).toLocaleString([], {month:"short", day:"numeric", hour:"numeric", minute:"2-digit"}); } catch(e){ return ""; } }
+  function grade(c){ return [c.grader, c.grade].filter(Boolean).join(" "); }
+  function meta(c){ return [c.set, c.number, grade(c)].filter(Boolean).join(" · "); }
+  function safeImg(u){ return /^https:\/\//i.test(u || "") ? u : ""; }
+  function sha256(t){ return crypto.subtle.digest("SHA-256", new TextEncoder().encode(t)).then(function(b){ return Array.prototype.map.call(new Uint8Array(b), function(x){ return ("0" + x.toString(16)).slice(-2); }).join(""); }); }
+  function getJSON(path){ return fetch(API + path).then(function(r){ return r.json(); }); }
+
+  function verify(pool, out){
+    out.textContent = "Checking…";
+    getJSON("/api/proof/" + pool.id).then(function(p){
+      if (!p.salt) { out.textContent = "Not available yet."; return; }
+      return sha256(p.salt + "|" + JSON.stringify(p.order)).then(function(h){
+        out.textContent = h === pool.hash ? "✓ The published order matches the fingerprint." : "✗ The order does not match the fingerprint.";
+      });
+    }).catch(function(){ out.textContent = "Could not load the proof."; });
+  }
+
+  function load(){
+    getJSON("/api/status").then(function(s){
+      var box = $("pools"); box.textContent = "";
+      var open = s.pools.filter(function(p){ return p.status === "open"; });
+      var done = s.pools.filter(function(p){ return p.status === "sold_out"; }).slice(-4);
+      if (!open.length && !done.length) box.appendChild(el("p", {class:"muted", style:"margin:0", text:"New pools are being loaded. Check back soon."}));
+      open.concat(done).forEach(function(p){
+        var pct = Math.round(100 * p.left / p.total), isOpen = p.status === "open";
+        var out = el("span", {class:"muted", style:"font-size:.875rem"});
+        var kids = [
+          el("div", {class:"top"}, [el("b", {style:"font-size:1.125rem", text: p.tierName + (p.price ? " · $" + p.price : "")}), el("span", {class:"muted", style:"font-size:.875rem", text:"Pool #" + p.no})]),
+          el("span", {class:"n", text: isOpen ? String(p.left) : "Sold out"}, [isOpen ? el("small", {text:" of " + p.total + " left"}) : null]),
+          el("div", {class:"meter", role:"img", "aria-label": p.left + " of " + p.total + " left"}, [el("div", {style:"width:" + pct + "%"})]),
+          el("span", {class:"fp-l", text:"LOCKED SHUFFLE FINGERPRINT (SHA-256)"}),
+          el("code", {class:"fp mono", text:p.hash})
+        ];
+        if (!isOpen) {
+          var b = el("button", {class:"btn-g", type:"button", style:"min-height:44px;padding:.4em 1.1em", text:"Verify this pool"});
+          b.addEventListener("click", function(){ verify(p, out); });
+          kids.push(el("div", {class:"row"}, [b, out]));
+        }
+        box.appendChild(el("div", {class:"pool"}, kids));
+      });
+      var tb = $("log"); tb.textContent = "";
+      if (!s.log.length) tb.appendChild(el("tr", {}, [el("td", {colspan:"4", class:"muted", text:"No reveals yet. Yours could be first."})]));
+      s.log.forEach(function(c){
+        tb.appendChild(el("tr", {}, [el("td", {class:"muted", text: when(c.revealedAt)}), el("td", {class:"mono", text: c.order || ""}), el("td", {text: c.tierName}),
+          el("td", {}, [el("b", {text: c.name}), meta(c) ? el("span", {class:"muted", text: " · " + meta(c)}) : null])]));
+      });
+    }).catch(function(){
+      var box = $("pools"); box.textContent = "";
+      box.appendChild(el("p", {class:"muted", style:"margin:0", text:"Couldn't load the pools right now. Reveals still work; try refreshing in a minute."}));
+    });
+  }
+
+  var last = null;
+  function show(card, already){
+    last = card;
+    $("r-tag").textContent = card.tierName.toUpperCase() + (card.order ? " · ORDER " + card.order : "");
+    $("r-name").textContent = card.name;
+    $("r-meta").textContent = meta(card);
+    $("r-note").textContent = already ? "You already revealed this code. Here is your card again." : "It ships tracked the next business day. Your reveal is now in the public log below.";
+    $("b-grader").textContent = card.grader || card.tierName;
+    $("b-grade").textContent = card.grade ? "GRADE " + card.grade : "";
+    var ph = $("b-ph"); ph.textContent = "";
+    if (safeImg(card.photo)) ph.appendChild(el("img", {src: card.photo, alt: card.name})); else ph.textContent = card.name;
+    $("enter").style.display = "none"; $("result").classList.add("on"); $("flip").classList.add("on");
+  }
+  var MSG = {
+    invalid_code: "That code didn't work. Check it against your eBay message (codes look like ROD-7KQ2-M9XD).",
+    sold_out: "This pool just ran out. Your code is still good: we're loading the next pool, so try again soon or message us on eBay.",
+    too_many_tries: "Too many tries. Wait a few minutes, then try again."
+  };
+  $("form").addEventListener("submit", function(e){
+    e.preventDefault();
+    var btn = $("go"), err = $("err"), flip = $("flip"), code = $("code").value.trim();
+    err.textContent = "";
+    if (!code) { err.textContent = "Enter the code from your eBay message."; $("code").focus(); return; }
+    btn.disabled = true; btn.textContent = "Shuffling…"; flip.classList.add("shake");
+    fetch(API + "/api/redeem", {method:"POST", headers:{"content-type":"application/json"}, body: JSON.stringify({code: code})})
+      .then(function(r){ return r.json().then(function(d){ return {ok: r.ok, d: d}; }); })
+      .then(function(x){
+        setTimeout(function(){
+          flip.classList.remove("shake"); btn.disabled = false; btn.textContent = "Reveal my card";
+          if (x.ok) { show(x.d.card, x.d.already); load(); return; }
+          err.textContent = MSG[x.d.error] || "Something went wrong. Please try again.";
+        }, x.ok ? 1000 : 300);
+      })
+      .catch(function(){ flip.classList.remove("shake"); btn.disabled = false; btn.textContent = "Reveal my card"; err.textContent = "Couldn't reach the server. Check your connection and try again."; });
+  });
+  $("again").addEventListener("click", function(){
+    $("flip").classList.remove("on"); $("result").classList.remove("on"); $("enter").style.display = "flex"; $("code").value = ""; $("code").focus();
+  });
+  $("share").addEventListener("click", function(){
+    if (!last) return;
+    var text = "I pulled " + last.name + (grade(last) ? " (" + grade(last) + ")" : "") + " from a ROD TCG " + last.tierName + "! @rodtcg_";
+    var url = location.origin + location.pathname;
+    if (navigator.share) navigator.share({text: text, url: url}).catch(function(){});
+    else if (navigator.clipboard) navigator.clipboard.writeText(text + " " + url).then(function(){ $("share").textContent = "Copied!"; });
+  });
+  var q = new URLSearchParams(location.search).get("code");
+  if (q) $("code").value = q.slice(0, 20);
+  load();
+})();
+</script>
+</body>
+</html>

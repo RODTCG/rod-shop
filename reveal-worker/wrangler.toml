@@ -1,0 +1,21 @@
+name = "rod-reveal"
+main = "src/worker.js"
+compatibility_date = "2026-10-01"
+workers_dev = true
+
+# The public reveal page lives on the shop site (reveal/index.html in the repo root).
+# REVEAL_URL: where buyers go (used in the eBay message, and this Worker's / redirects there).
+# ALLOWED_ORIGINS: sites allowed to call the public API from the browser (comma-separated).
+[vars]
+REVEAL_URL = "https://shop.rod-tcg.com/reveal/"
+ALLOWED_ORIGINS = "https://shop.rod-tcg.com"
+
+[[durable_objects.bindings]]
+name = "REVEAL"
+class_name = "RevealStore"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["RevealStore"]
+
+# The admin password is a secret, never in this file:  npx wrangler secret put ADMIN_SECRET
