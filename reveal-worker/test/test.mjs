@@ -249,5 +249,16 @@ ok("Clear test data removes only test pools/cards/codes; real data and real pool
 }
 ok("the live database upgrades in place: existing pools and codes stay real and keep working");
 
+// reveal animation setting
+assert.equal((await call("GET", "/api/status")).data.animation, "flip");
+assert.equal((await call("POST", "/api/admin/settings", { animation: "scratch" })).status, 401);
+assert.equal((await call("POST", "/api/admin/settings", { animation: "explode" }, SECRET)).status, 400);
+r = await call("POST", "/api/admin/settings", { animation: "scratch" }, SECRET);
+assert.equal(r.data.animation, "scratch");
+assert.equal((await call("GET", "/api/status")).data.animation, "scratch");
+assert.equal((await call("GET", "/api/admin/overview", null, SECRET)).data.settings.animation, "scratch");
+for (const a of mod.ANIMATIONS) assert.ok(shopPage.includes('["' + a + '"'), "reveal page is missing animation " + a);
+ok("the buyer animation setting saves (admin only, known animations only) and the reveal page has all five");
+
 fs.unlinkSync(path.join(here, "_worker.mjs"));
 console.log(`\nAll ${n} checks passed.`);

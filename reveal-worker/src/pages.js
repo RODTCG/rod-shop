@@ -104,6 +104,13 @@ td .btn{min-height:40px}
 <section class="box testbox">
   <h2>Test mode</h2>
   <p class="muted" style="margin:0">To try the whole flow without a real listing: load a <b>test pool</b> (tick the box in step 3), make a <b>test code</b> (tick the box in step 1), and redeem it on the reveal page. Test reveals show "TEST" to you, never appear on the public page, and never touch your real pools. Clear them when you're done.</p>
+  <div class="fields" style="align-items:end">
+    <div class="f"><label for="anim">REVEAL ANIMATION BUYERS SEE</label><select id="anim">
+      <option value="flip">Card flip</option><option value="pack">Pack tear</option><option value="holo">Holo burst</option>
+      <option value="scratch">Scratch-off (buyer scratches with finger or mouse)</option><option value="spin">Spin</option></select></div>
+    <div class="f"><button class="btn pink" id="anim-save" type="button" style="align-self:flex-start">Save animation</button></div>
+  </div>
+  <span class="muted" id="anim-msg" style="font-size:14px">After a test reveal, the reveal page lets you replay your card with each animation before you choose.</span>
   <span id="t-count" class="muted"></span>
   <button class="btn ghost" id="t-clear" type="button" style="align-self:flex-start">Clear test data</button>
   <div class="err" id="t-msg" role="status" style="color:var(--muted)"></div>
@@ -172,6 +179,7 @@ td .btn{min-height:40px}
       });
       var un = $('unused'); un.textContent = '';
       if (!o.unused.length) un.appendChild(el('tr', {}, [el('td', {colspan:'4', class:'muted', text:'None.'})]));
+      if (o.settings && !animTouched) $('anim').value = o.settings.animation;
       var tc = o.testCount || {pools:0, codes:0};
       $('t-count').textContent = tc.pools || tc.codes ? 'Right now: ' + tc.pools + ' test pool(s) and ' + tc.codes + ' test code(s).' : 'No test data right now.';
       $('t-clear').disabled = !(tc.pools || tc.codes);
@@ -221,6 +229,12 @@ td .btn{min-height:40px}
     if (!items.length || bad) { $('p-go').disabled = true; $('p-info').textContent = ''; $('p-err').textContent = items.length ? bad + ' line(s) have no name.' : 'Paste at least one card.'; return; }
     $('p-info').textContent = items.length + ' cards ready for a new ' + NAMES[$('p-tier').value] + ' pool.';
     $('p-go').disabled = false;
+  });
+  var animTouched = false;
+  $('anim').addEventListener('change', function(){ animTouched = true; $('anim-msg').textContent = 'Not saved yet.'; });
+  $('anim-save').addEventListener('click', function(){
+    api('settings', {animation: $('anim').value}).then(function(){ animTouched = false; $('anim-msg').textContent = 'Saved. Buyers now see: ' + $('anim').selectedOptions[0].textContent.replace(/ \(.*/, '') + '.'; })
+      .catch(function(e){ $('anim-msg').textContent = e.message; });
   });
   $('t-clear').addEventListener('click', function(){
     if (!confirm('Delete all test pools, test cards and test codes? Real pools and codes are not touched.')) return;

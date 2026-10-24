@@ -16,6 +16,7 @@
 //          POST /api/admin/shipped {item_id}
 //          POST /api/admin/pool/delete {pool_id}   (only before anything from it is revealed)
 //          POST /api/admin/test/clear     deletes every test pool, test card and test code
+//          POST /api/admin/settings {animation}   which reveal animation buyers see
 // Test mode: pools and codes made with {test:true} form a separate world. Test codes draw only from test pools,
 // real codes never do, test pools have their own numbering, and nothing test appears on the public page.
 
@@ -26,6 +27,7 @@ export const TIERS = {
   slab: { name: "Mystery Slab", price: 50 },
   hit: { name: "Mystery Hit", price: 15 },
 };
+export const ANIMATIONS = ["flip", "pack", "holo", "scratch", "spin"];   // reveal animations buyers can be shown
 const CODE_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"; // no 0/O, 1/I/L
 const MAX_FAILS = 10, FAIL_WINDOW_MS = 10 * 60 * 1000;
 
@@ -75,6 +77,7 @@ export class RevealStore extends DurableObject {
     this.sql.exec(`CREATE TABLE IF NOT EXISTS codes (code TEXT PRIMARY KEY, tier TEXT NOT NULL, order_ref TEXT, note TEXT,
         created_at TEXT NOT NULL, used_at TEXT, item_id INTEGER)`);
     this.sql.exec(`CREATE INDEX IF NOT EXISTS items_draw ON items (pool_id, code, position)`);
+    this.sql.exec(`CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT)`);
     // Upgrade databases made before test mode existed: existing pools and codes are real (test = 0).
     for (const t of ["pools", "codes"]) {
       try { this.sql.exec(`ALTER TABLE ${t} ADD COLUMN test INTEGER NOT NULL DEFAULT 0`); }
@@ -83,6 +86,7 @@ export class RevealStore extends DurableObject {
   }
   rows(q, ...b) { return this.sql.exec(q, ...b).toArray(); }
   now() { return new Date().toISOString(); }
+  setting(k, d) { const r = this.rows("SELECT value FROM settings WHERE key=?", k)[0]; return r ? r.value : d; }
   left(poolId) { return this.rows("SELECT COUNT(*) AS n FROM items WHERE pool_id=? AND code IS NULL", poolId)[0].n; }
   card(it, tier, test) {
     return { name: it.name, set: it.set_name, number: it.number, grader: it.grader, grade: it.grade, photo: it.photo,
@@ -104,6 +108,7 @@ export class RevealStore extends DurableObject {
       if (p === "/api/admin/shipped" && m === "POST") return json(this.shipped(body.item_id, body.undo));
       if (p === "/api/admin/pool/delete" && m === "POST") return json(this.deletePool(body.pool_id));
       if (p === "/api/admin/test/clear" && m === "POST") return json(this.clearTest());
+      if (p === "/api/admin/settings" && m === "POST") return json(this.saveSettings(body));
       return json({ error: "not_found" }, 404);
     } catch (e) {
       if (e instanceof UserError) return json({ error: e.message }, 400);
@@ -117,7 +122,7 @@ export class RevealStore extends DurableObject {
       status: x.status, total: x.total, left: this.left(x.id), hash: x.hash }));
     const log = this.rows(`SELECT i.*, p.tier FROM items i JOIN pools p ON p.id=i.pool_id WHERE i.code IS NOT NULL AND p.test=0
         ORDER BY i.revealed_at DESC LIMIT 30`).map((it) => this.card(it, it.tier));
-    return { tiers: TIERS, pools, log };
+    return { tiers: TIERS, pools, log, animation: this.setting("animation", "flip") };
   }
 
   redeem(raw, ip) {
@@ -207,13 +212,20 @@ export class RevealStore extends DurableObject {
     const testCount = {
       pools: this.rows("SELECT COUNT(*) AS n FROM pools WHERE test=1")[0].n,
       codes: this.rows("SELECT COUNT(*) AS n FROM codes WHERE test=1")[0].n };
-    return { pools, revealed, unused, testCount };
+    return { pools, revealed, unused, testCount, settings: { animation: this.setting("animation", "flip") }, animations: ANIMATIONS };
   }
 
   shipped(id, undo) {
     const r = this.sql.exec("UPDATE items SET shipped_at=? WHERE id=? AND code IS NOT NULL", undo ? null : this.now(), Number(id));
     if (!r.rowsWritten) throw new UserError("not_revealed_or_missing");
     return { ok: true };
+  }
+
+  saveSettings(b) {
+    const a = String(b.animation || "");
+    if (!ANIMATIONS.includes(a)) throw new UserError("unknown_animation");
+    this.sql.exec("INSERT INTO settings (key, value) VALUES ('animation', ?) ON CONFLICT(key) DO UPDATE SET value=excluded.value", a);
+    return { ok: true, animation: a };
   }
 
   clearTest() {

@@ -27,6 +27,13 @@ real codes never do; test pools have their own numbering; test reveals are label
 appear in the public status, log or proofs. **Clear test data** on the admin page deletes every test pool, test card
 and test code, leaving real data untouched.
 
+## Reveal animations
+
+The reveal page has five animations: **Card flip**, **Pack tear**, **Holo burst**, **Scratch-off** (the buyer scratches
+a foil layer with a finger or mouse; "Reveal it all" skips it) and **Spin**. Pick the one buyers see in the admin page's
+Test mode box (default: Card flip). After a test reveal, the reveal page shows buttons to replay that card with each
+animation. Visitors who have reduced motion turned on see the card straight away.
+
 ## How the fair draw works
 
 When a pool is loaded it is shuffled with a cryptographic random generator, and
@@ -47,6 +54,6 @@ page's **Verify this pool** button recomputes the hash in the buyer's browser.
 
 ```
 npm ci
-npm test            # 21 checks against node:sqlite, no Cloudflare needed
+npm test            # 22 checks against node:sqlite, no Cloudflare needed
 echo 'ADMIN_SECRET=some-long-password' > .dev.vars && npm run dev   # http://localhost:8787
 ```
