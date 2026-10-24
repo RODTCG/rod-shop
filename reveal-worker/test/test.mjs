@@ -186,5 +186,68 @@ assert.ok(!flat.includes("12-34567-89012") && !/ROD-[A-Z0-9]{4}-/.test(flat) && 
 assert.equal(st.log[0].order.length, 5);
 ok("the public page shows only the last 4 of an order number, never codes or the salt");
 
+// ---- test mode ----
+const realSlabPoolsBefore = (await call("GET", "/api/status")).data.pools.filter((p) => p.tier === "slab").length;
+r = await call("POST", "/api/admin/pool", { tier: "slab", test: true, items: [{ name: "TEST slab A" }, { name: "TEST slab B" }] }, SECRET);
+assert.equal(r.data.test, true); assert.equal(r.data.no, 1);
+const testPool = r.data;
+st = (await call("GET", "/api/status")).data;
+assert.ok(!st.pools.some((p) => p.id === testPool.pool_id));
+assert.equal(st.pools.filter((p) => p.tier === "slab").length, realSlabPoolsBefore);
+ok("a test pool gets its own numbering (#1) and doesn't appear on the public page");
+
+const tc = await call("POST", "/api/admin/codes", { tier: "slab", order: "TEST", count: 2, test: true }, SECRET);
+assert.equal(tc.data.test, true);
+const realOnly = await call("POST", "/api/admin/codes", { tier: "slab", order: "REAL-1" }, SECRET);
+r = await call("POST", "/api/redeem", { code: tc.data.codes[0] }, null, "8.8.8.1");
+assert.equal(r.status, 200); assert.equal(r.data.card.test, true); assert.match(r.data.card.name, /^TEST slab/);
+r = await call("POST", "/api/redeem", { code: realOnly.data.codes[0] }, null, "8.8.8.2");   // real pool #2 is sold out
+assert.equal(r.status, 409); assert.equal(r.data.error, "sold_out");
+r = await call("POST", "/api/redeem", { code: tc.data.codes[1] }, null, "8.8.8.1");
+assert.equal(r.data.card.test, true);
+r = await call("POST", "/api/redeem", { code: tc.data.codes[0] }, null, "8.8.8.1");
+assert.equal(r.data.already, true); assert.equal(r.data.card.test, true);
+ok("test codes draw only from test pools; real codes never draw test cards (even when real pools are empty)");
+
+st = (await call("GET", "/api/status")).data;
+assert.ok(!JSON.stringify(st).includes("TEST slab"));
+assert.equal((await call("GET", `/api/proof/${testPool.pool_id}`)).status, 404);
+r = await call("GET", "/api/admin/overview", null, SECRET);
+assert.equal(r.data.testCount.pools, 1); assert.equal(r.data.testCount.codes, 2);
+assert.ok(r.data.revealed.filter((x) => x.test).length === 2);
+assert.ok(r.data.pools.find((p) => p.id === testPool.pool_id).test);
+ok("test reveals stay out of the public log and proofs, but show in admin marked as test");
+
+const realRevealsBefore = r.data.revealed.filter((x) => !x.test).length;
+r = await call("POST", "/api/admin/test/clear", {}, SECRET);
+assert.deepEqual([r.data.pools, r.data.codes], [1, 2]);
+r = await call("GET", "/api/admin/overview", null, SECRET);
+assert.equal(r.data.testCount.pools, 0); assert.equal(r.data.testCount.codes, 0);
+assert.equal(r.data.revealed.length, realRevealsBefore);
+assert.ok(r.data.unused.some((c) => c.code === realOnly.data.codes[0]));
+r = await call("POST", "/api/admin/pool", { tier: "slab", items: [{ name: "Real pool 3 card" }] }, SECRET);
+assert.equal(r.data.no, 3);
+assert.equal((await call("POST", "/api/admin/test/clear", {})).status, 401);
+ok("Clear test data removes only test pools/cards/codes; real data and real pool numbering are untouched");
+
+// upgrading a database made before test mode existed
+{
+  const old = fakeStorage();
+  old.sql.exec(`CREATE TABLE pools (id INTEGER PRIMARY KEY, tier TEXT NOT NULL, no INTEGER NOT NULL, status TEXT NOT NULL,
+      salt TEXT NOT NULL, hash TEXT NOT NULL, total INTEGER NOT NULL, created_at TEXT NOT NULL)`);
+  old.sql.exec(`CREATE TABLE items (id INTEGER PRIMARY KEY, pool_id INTEGER NOT NULL, position INTEGER NOT NULL, name TEXT, set_name TEXT,
+      number TEXT, grader TEXT, grade TEXT, photo TEXT, code TEXT, order_ref TEXT, revealed_at TEXT, shipped_at TEXT)`);
+  old.sql.exec(`CREATE TABLE codes (code TEXT PRIMARY KEY, tier TEXT NOT NULL, order_ref TEXT, note TEXT, created_at TEXT NOT NULL, used_at TEXT, item_id INTEGER)`);
+  old.sql.exec("INSERT INTO pools (tier,no,status,salt,hash,total,created_at) VALUES ('hit',1,'open','s','h',1,'2026-10-23')");
+  old.sql.exec("INSERT INTO items (pool_id,position,name) VALUES (1,1,'Old card')");
+  old.sql.exec("INSERT INTO codes (code,tier,created_at) VALUES ('ROD-OLDD-CODE','hit','2026-10-23')");
+  const up = new RevealStore({ storage: old }, env);
+  new RevealStore({ storage: old }, env);                     // second start: no error on the existing column
+  assert.equal(up.status().pools.length, 1);
+  const res = await up.redeem("ROD-OLDD-CODE", "9.9.9.9").json();
+  assert.equal(res.card.name, "Old card"); assert.equal(res.card.test, false);
+}
+ok("the live database upgrades in place: existing pools and codes stay real and keep working");
+
 fs.unlinkSync(path.join(here, "_worker.mjs"));
 console.log(`\nAll ${n} checks passed.`);

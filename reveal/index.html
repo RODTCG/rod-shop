@@ -33,6 +33,7 @@ form.code input:focus{outline:none;border-color:var(--cyan)}
 .hint{font-size:.875rem;color:var(--muted);margin:0}
 .result{display:none;flex-direction:column;gap:14px}
 .result.on{display:flex}
+.tag.test{background:#FFB020}
 .tag{align-self:flex-start;background:var(--cyan);color:var(--bg);border-radius:999px;padding:.25em .9em;font-weight:800;font-size:.8125rem;letter-spacing:.06em}
 .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
 .flip{width:240px;max-width:70vw;aspect-ratio:3/5;perspective:1200px}
@@ -216,10 +217,12 @@ tbody td{border-top:1px solid var(--line)}
   var last = null;
   function show(card, already){
     last = card;
-    $("r-tag").textContent = card.tierName.toUpperCase() + (card.order ? " · ORDER " + card.order : "");
+    $("r-tag").textContent = (card.test ? "TEST REVEAL · " : "") + card.tierName.toUpperCase() + (card.order ? " · ORDER " + card.order : "");
+    $("r-tag").className = card.test ? "tag test" : "tag";
     $("r-name").textContent = card.name;
     $("r-meta").textContent = meta(card);
-    $("r-note").textContent = already ? "You already revealed this code. Here is your card again." : "It ships tracked the next business day. Your reveal is now in the public log below.";
+    $("r-note").textContent = card.test ? "This was a test code: nothing ships, and it isn't shown in the public log." :
+      already ? "You already revealed this code. Here is your card again." : "It ships tracked the next business day. Your reveal is now in the public log below.";
     $("b-grader").textContent = card.grader || card.tierName;
     $("b-grade").textContent = card.grade ? "GRADE " + card.grade : "";
     var ph = $("b-ph"); ph.textContent = "";

@@ -51,6 +51,11 @@ textarea{min-height:170px;font-family:'JetBrains Mono',monospace;font-size:13px}
 .out{background:var(--bg);border-radius:12px;padding:14px;white-space:pre-wrap;word-break:break-word}
 .btn.sm{min-height:44px;padding:8px 14px;font-size:14px}
 td .btn{min-height:40px}
+.check{display:flex;align-items:center;gap:10px;font-weight:700;font-size:15px;letter-spacing:0;color:var(--text);cursor:pointer;min-height:44px}
+.check input{width:22px;height:22px;flex:none;accent-color:#FFB020;padding:0}
+.testtag{display:inline-block;background:#FFB020;color:#1B0F3A;border-radius:999px;padding:1px 9px;font-weight:800;font-size:12px;letter-spacing:.5px;vertical-align:2px;margin-left:6px}
+.testbox{border:2px dashed #FFB020}
+.out.test{border:2px dashed #FFB020}
 </style></head><body>
 <div class="wrap" style="padding-bottom:64px">
 <nav class="top"><a class="logo" href="/admin">ROD <span>TCG</span> · mystery admin</a><a href="/">Public reveal page →</a></nav>
@@ -71,10 +76,11 @@ td .btn{min-height:40px}
     <div class="f"><label for="c-count">HOW MANY (QTY BOUGHT)</label><input id="c-count" type="number" min="1" max="50" value="1"></div>
     <div class="f"><label for="c-note">NOTE (OPTIONAL)</label><input id="c-note" placeholder="buyer username"></div>
   </div>
+  <label class="check"><input type="checkbox" id="c-test"> Test code: draws only from test pools, never shown on the public page</label>
   <button class="btn pink" id="c-go" type="button" style="align-self:flex-start">Make code</button>
   <div class="err" id="c-err" role="alert"></div>
   <div id="c-out" style="display:none;flex-direction:column;gap:10px">
-    <label>MESSAGE TO PASTE INTO EBAY MESSAGES</label>
+    <label id="c-label">MESSAGE TO PASTE INTO EBAY MESSAGES</label>
     <div class="out" id="c-msg"></div>
     <button class="btn ghost sm" id="c-copy" type="button" style="align-self:flex-start">Copy message</button>
   </div>
@@ -89,9 +95,18 @@ td .btn{min-height:40px}
   <h2>3 · Load a new pool</h2>
   <p class="muted" style="margin:0">One card per line: <span class="mono">name, set, number, grader, grade, photo URL</span>. Only the name is required; put quotes around a value that has a comma. The pool is shuffled and locked when you load it, and its fingerprint goes on the public page. A new pool starts after the current one for that type sells out.</p>
   <div class="fields"><div class="f"><label for="p-tier">TYPE</label><select id="p-tier"><option value="slab">Mystery Slab ($50)</option><option value="hit">Mystery Hit ($15)</option></select></div></div>
+  <label class="check"><input type="checkbox" id="p-test"> Test pool: only test codes draw from it, hidden from the public page, doesn't use up a real pool number</label>
   <div class="f"><label for="p-csv">CARDS</label><textarea id="p-csv" placeholder="Gengar ex, 30th Celebration, 154/128, PSA, 9, https://i.ebayimg.com/..."></textarea></div>
   <div class="row" style="display:flex;flex-wrap:wrap;gap:10px;align-items:center"><button class="btn ghost" id="p-check" type="button">Check list</button><button class="btn pink" id="p-go" type="button" disabled>Shuffle &amp; load pool</button><span class="muted" id="p-info"></span></div>
   <div class="err" id="p-err" role="alert"></div>
+</section>
+
+<section class="box testbox">
+  <h2>Test mode</h2>
+  <p class="muted" style="margin:0">To try the whole flow without a real listing: load a <b>test pool</b> (tick the box in step 3), make a <b>test code</b> (tick the box in step 1), and redeem it on the reveal page. Test reveals show "TEST" to you, never appear on the public page, and never touch your real pools. Clear them when you're done.</p>
+  <span id="t-count" class="muted"></span>
+  <button class="btn ghost" id="t-clear" type="button" style="align-self:flex-start">Clear test data</button>
+  <div class="err" id="t-msg" role="status" style="color:var(--muted)"></div>
 </section>
 
 <section class="box">
@@ -135,7 +150,7 @@ td .btn{min-height:40px}
       o.revealed.forEach(function(r){
         var b = el('button', {class:'btn ghost sm', type:'button', text: r.shipped_at ? 'Undo' : 'Mark shipped'});
         b.addEventListener('click', function(){ b.disabled = true; api('shipped', {item_id: r.id, undo: !!r.shipped_at}).then(refresh); });
-        var row = el('tr', {}, [el('td', {class:'muted', text: when(r.shipped_at || r.revealed_at)}), el('td', {class:'mono', text: r.order_ref || r.code}), el('td', {text: NAMES[r.tier] || r.tier}), el('td', {text: card(r)}), el('td', {}, [b])]);
+        var row = el('tr', {}, [el('td', {class:'muted', text: when(r.shipped_at || r.revealed_at)}), el('td', {class:'mono', text: r.order_ref || r.code}), el('td', {}, [NAMES[r.tier] || r.tier, r.test ? el('span', {class:'testtag', text:'TEST'}) : null]), el('td', {text: card(r)}), el('td', {}, [b])]);
         (r.shipped_at ? done : ship).appendChild(row);
       });
       if (!ship.children.length) ship.appendChild(el('tr', {}, [el('td', {colspan:'5', class:'muted', text:'Nothing to ship.'})]));
@@ -144,7 +159,7 @@ td .btn{min-height:40px}
       o.pools.slice().reverse().forEach(function(p){
         var list = el('ul', {style:'margin:8px 0 0;padding-left:20px'});
         p.remaining.forEach(function(c){ list.appendChild(el('li', {text: card(c)})); });
-        var kids = [el('strong', {text: p.tierName + ' · pool #' + p.no + ' · ' + p.status.replace('_', ' ')}),
+        var kids = [el('strong', {}, [(p.test ? 'Test ' : '') + p.tierName + ' · ' + (p.test ? 'test pool' : 'pool') + ' #' + p.no + ' · ' + p.status.replace('_', ' '), p.test ? el('span', {class:'testtag', text:'TEST'}) : null]),
           el('span', {class:'muted', text: p.left + ' of ' + p.total + ' left'}),
           el('code', {class:'mono', style:'font-size:12px;color:var(--cyan);word-break:break-all', text: p.hash})];
         if (p.remaining.length) kids.push(el('details', {}, [el('summary', {style:'cursor:pointer;font-weight:700', text:'Cards still in the pool (A–Z, not draw order)'}), list]));
@@ -157,7 +172,10 @@ td .btn{min-height:40px}
       });
       var un = $('unused'); un.textContent = '';
       if (!o.unused.length) un.appendChild(el('tr', {}, [el('td', {colspan:'4', class:'muted', text:'None.'})]));
-      o.unused.forEach(function(c){ un.appendChild(el('tr', {}, [el('td', {class:'mono', text:c.code}), el('td', {text: NAMES[c.tier] || c.tier}), el('td', {text: (c.order_ref || '') + (c.note ? ' (' + c.note + ')' : '')}), el('td', {class:'muted', text: when(c.created_at)})])); });
+      var tc = o.testCount || {pools:0, codes:0};
+      $('t-count').textContent = tc.pools || tc.codes ? 'Right now: ' + tc.pools + ' test pool(s) and ' + tc.codes + ' test code(s).' : 'No test data right now.';
+      $('t-clear').disabled = !(tc.pools || tc.codes);
+      o.unused.forEach(function(c){ un.appendChild(el('tr', {}, [el('td', {class:'mono', text:c.code}), el('td', {}, [NAMES[c.tier] || c.tier, c.test ? el('span', {class:'testtag', text:'TEST'}) : null]), el('td', {text: (c.order_ref || '') + (c.note ? ' (' + c.note + ')' : '')}), el('td', {class:'muted', text: when(c.created_at)})])); });
     });
   }
 
@@ -171,8 +189,11 @@ td .btn{min-height:40px}
 
   $('c-go').addEventListener('click', function(){
     $('c-err').textContent = '';
-    api('codes', {tier: $('c-tier').value, order: $('c-order').value, count: $('c-count').value, note: $('c-note').value})
-      .then(function(r){ $('c-msg').textContent = r.message; $('c-out').style.display = 'flex'; $('c-copy').textContent = 'Copy message'; refresh(); })
+    api('codes', {tier: $('c-tier').value, order: $('c-order').value, count: $('c-count').value, note: $('c-note').value, test: $('c-test').checked})
+      .then(function(r){
+        $('c-msg').textContent = r.message; $('c-msg').className = r.test ? 'out test' : 'out';
+        $('c-label').textContent = r.test ? 'TEST CODE: FOR YOU ONLY, DON’T SEND TO A BUYER' : 'MESSAGE TO PASTE INTO EBAY MESSAGES';
+        $('c-out').style.display = 'flex'; $('c-copy').textContent = 'Copy message'; $('c-test').checked = false; refresh(); })
       .catch(function(e){ $('c-err').textContent = e.message; });
   });
   $('c-copy').addEventListener('click', function(){ navigator.clipboard.writeText($('c-msg').textContent).then(function(){ $('c-copy').textContent = 'Copied!'; }); });
@@ -201,12 +222,19 @@ td .btn{min-height:40px}
     $('p-info').textContent = items.length + ' cards ready for a new ' + NAMES[$('p-tier').value] + ' pool.';
     $('p-go').disabled = false;
   });
+  $('t-clear').addEventListener('click', function(){
+    if (!confirm('Delete all test pools, test cards and test codes? Real pools and codes are not touched.')) return;
+    $('t-clear').disabled = true;
+    api('test/clear', {}).then(function(r){ $('t-msg').textContent = 'Cleared ' + r.pools + ' test pool(s) and ' + r.codes + ' test code(s).'; refresh(); })
+      .catch(function(e){ $('t-msg').textContent = e.message; $('t-clear').disabled = false; });
+  });
   $('p-csv').addEventListener('input', function(){ $('p-go').disabled = true; $('p-info').textContent = ''; });
   $('p-go').addEventListener('click', function(){
-    if (!confirm('Shuffle and lock ' + items.length + ' cards into a new ' + NAMES[$('p-tier').value] + ' pool? The order cannot be changed afterwards.')) return;
+    var isTest = $('p-test').checked;
+    if (!confirm('Shuffle and lock ' + items.length + ' cards into a new ' + (isTest ? 'TEST ' : '') + NAMES[$('p-tier').value] + ' pool? The order cannot be changed afterwards.')) return;
     $('p-go').disabled = true;
-    api('pool', {tier: $('p-tier').value, items: items})
-      .then(function(r){ $('p-info').textContent = 'Loaded pool #' + r.no + ' (' + r.total + ' cards).'; $('p-csv').value = ''; refresh(); })
+    api('pool', {tier: $('p-tier').value, items: items, test: isTest})
+      .then(function(r){ $('p-info').textContent = 'Loaded ' + (r.test ? 'test pool' : 'pool') + ' #' + r.no + ' (' + r.total + ' cards).'; $('p-csv').value = ''; $('p-test').checked = false; refresh(); })
       .catch(function(e){ $('p-err').textContent = e.message; $('p-go').disabled = false; });
   });
 })();

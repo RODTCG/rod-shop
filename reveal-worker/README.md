@@ -20,6 +20,13 @@ when a push to `main` changes `reveal-worker/` or `reveal/`. It does not touch `
   3. **Load a new pool**: paste one card per line (`name, set, number, grader, grade, photo URL`), shuffle and lock.
   Plus pools (with the cards still in them, listed A–Z so you can't see who gets what next) and unused codes.
 
+## Test mode
+
+Tick **Test pool** when loading a pool and **Test code** when making a code. Test codes draw only from test pools and
+real codes never do; test pools have their own numbering; test reveals are labelled TEST on the reveal page and never
+appear in the public status, log or proofs. **Clear test data** on the admin page deletes every test pool, test card
+and test code, leaving real data untouched.
+
 ## How the fair draw works
 
 When a pool is loaded it is shuffled with a cryptographic random generator, and
@@ -40,6 +47,6 @@ page's **Verify this pool** button recomputes the hash in the buyer's browser.
 
 ```
 npm ci
-npm test            # 16 checks against node:sqlite, no Cloudflare needed
+npm test            # 21 checks against node:sqlite, no Cloudflare needed
 echo 'ADMIN_SECRET=some-long-password' > .dev.vars && npm run dev   # http://localhost:8787
 ```
