@@ -101,6 +101,12 @@ td .btn{min-height:40px}
   <div class="err" id="p-err" role="alert"></div>
 </section>
 
+<section class="box">
+  <h2>Reveal page settings</h2>
+  <label class="check"><input type="checkbox" id="show-left"> Show what's left to buyers: each open pool on the reveal page lists its remaining cards (A–Z, never the draw order)</label>
+  <span class="muted" id="show-left-msg" style="font-size:14px"></span>
+</section>
+
 <section class="box testbox">
   <h2>Test mode</h2>
   <p class="muted" style="margin:0">To try the whole flow without a real listing: load a <b>test pool</b> (tick the box in step 3), make a <b>test code</b> (tick the box in step 1), and redeem it on the reveal page. Test reveals show "TEST" to you, never appear on the public page, and never touch your real pools. Clear them when you're done.</p>
@@ -180,6 +186,7 @@ td .btn{min-height:40px}
       var un = $('unused'); un.textContent = '';
       if (!o.unused.length) un.appendChild(el('tr', {}, [el('td', {colspan:'4', class:'muted', text:'None.'})]));
       if (o.settings && !animTouched) $('anim').value = o.settings.animation;
+      if (o.settings) { $('show-left').checked = !!o.settings.show_remaining; $('show-left-msg').textContent = o.settings.show_remaining ? 'On: buyers can see the cards left in each open pool.' : 'Off: buyers only see how many cards are left.'; }
       var tc = o.testCount || {pools:0, codes:0};
       $('t-count').textContent = tc.pools || tc.codes ? 'Right now: ' + tc.pools + ' test pool(s) and ' + tc.codes + ' test code(s).' : 'No test data right now.';
       $('t-clear').disabled = !(tc.pools || tc.codes);
@@ -229,6 +236,13 @@ td .btn{min-height:40px}
     if (!items.length || bad) { $('p-go').disabled = true; $('p-info').textContent = ''; $('p-err').textContent = items.length ? bad + ' line(s) have no name.' : 'Paste at least one card.'; return; }
     $('p-info').textContent = items.length + ' cards ready for a new ' + NAMES[$('p-tier').value] + ' pool.';
     $('p-go').disabled = false;
+  });
+  $('show-left').addEventListener('change', function(){
+    var on = $('show-left').checked;
+    if (on && !confirm('Show buyers the list of cards still in each open pool? (A–Z only; the draw order stays secret.) Keep your eBay listings general: don’t name specific valuable cards there.')) { $('show-left').checked = false; return; }
+    $('show-left').disabled = true;
+    api('settings', {show_remaining: on}).then(function(){ $('show-left').disabled = false; refresh(); })
+      .catch(function(e){ $('show-left').disabled = false; $('show-left').checked = !on; $('show-left-msg').textContent = e.message; });
   });
   var animTouched = false;
   $('anim').addEventListener('change', function(){ animTouched = true; $('anim-msg').textContent = 'Not saved yet.'; });

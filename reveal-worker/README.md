@@ -34,6 +34,12 @@ a foil layer with a finger or mouse; "Reveal it all" skips it) and **Spin**. Pic
 Test mode box (default: Card flip). After a test reveal, the reveal page shows buttons to replay that card with each
 animation. Visitors who have reduced motion turned on see the card straight away.
 
+## Show what's left (off by default)
+
+Admin page > **Reveal page settings** > "Show what's left to buyers". When on, each open real pool on the reveal page
+gets a "What's left" list of its remaining cards, sorted A–Z so it never hints at the draw order. Sold-out pools and
+test pools never show a list. Keep eBay listings general (don't name specific valuable cards there).
+
 ## How the fair draw works
 
 When a pool is loaded it is shuffled with a cryptographic random generator, and
@@ -54,6 +60,6 @@ page's **Verify this pool** button recomputes the hash in the buyer's browser.
 
 ```
 npm ci
-npm test            # 22 checks against node:sqlite, no Cloudflare needed
+npm test            # 23 checks against node:sqlite, no Cloudflare needed
 echo 'ADMIN_SECRET=some-long-password' > .dev.vars && npm run dev   # http://localhost:8787
 ```

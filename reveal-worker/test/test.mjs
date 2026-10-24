@@ -260,5 +260,29 @@ assert.equal((await call("GET", "/api/admin/overview", null, SECRET)).data.setti
 for (const a of mod.ANIMATIONS) assert.ok(shopPage.includes('["' + a + '"'), "reveal page is missing animation " + a);
 ok("the buyer animation setting saves (admin only, known animations only) and the reveal page has all five");
 
+// "show what's left" switch: off by default; when on, open real pools list remaining cards A–Z
+st = (await call("GET", "/api/status")).data;
+assert.ok(st.pools.every((p) => !("remaining" in p)));
+assert.equal((await call("GET", "/api/admin/overview", null, SECRET)).data.settings.show_remaining, false);
+assert.equal((await call("POST", "/api/admin/settings", { show_remaining: true })).status, 401);
+assert.equal((await call("POST", "/api/admin/settings", { show_remaining: "yes" }, SECRET)).status, 400);
+await call("POST", "/api/admin/pool", { tier: "hit", items: [{ name: "Zapdos", grader: "PSA", grade: "9" }, { name: "Abra" }, { name: "Mew ex", set: "30th" }] }, SECRET);
+await call("POST", "/api/admin/pool", { tier: "hit", test: true, items: [{ name: "SECRET TEST CARD" }] }, SECRET);
+r = await call("POST", "/api/admin/settings", { show_remaining: true }, SECRET);
+assert.equal(r.data.show_remaining, true); assert.equal(r.data.animation, "scratch");   // animation untouched
+st = (await call("GET", "/api/status")).data;
+const openHit = st.pools.filter((p) => p.tier === "hit" && p.status === "open");
+const withList = openHit.find((p) => p.remaining && p.remaining.some((c) => c.name === "Zapdos"));
+assert.ok(withList);
+const nm = withList.remaining.map((c) => c.name);
+assert.deepEqual(nm, [...nm].sort());
+assert.ok(!("position" in withList.remaining[0]) && !("code" in withList.remaining[0]));
+assert.ok(st.pools.filter((p) => p.status === "sold_out").every((p) => !p.remaining));
+assert.ok(!JSON.stringify(st).includes("SECRET TEST CARD"));
+assert.match(shopPage, /What's left \(/);
+r = await call("POST", "/api/admin/settings", { show_remaining: false }, SECRET);
+assert.ok((await call("GET", "/api/status")).data.pools.every((p) => !("remaining" in p)));
+ok("what's-left list is off by default; when on, only open real pools list cards, A–Z, no draw order");
+
 fs.unlinkSync(path.join(here, "_worker.mjs"));
 console.log(`\nAll ${n} checks passed.`);

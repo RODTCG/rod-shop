@@ -16,7 +16,8 @@
 //          POST /api/admin/shipped {item_id}
 //          POST /api/admin/pool/delete {pool_id}   (only before anything from it is revealed)
 //          POST /api/admin/test/clear     deletes every test pool, test card and test code
-//          POST /api/admin/settings {animation}   which reveal animation buyers see
+//          POST /api/admin/settings {animation?, show_remaining?}   reveal animation buyers see; whether open pools
+//                                         list their remaining cards (A–Z, never draw order) on the public page
 // Test mode: pools and codes made with {test:true} form a separate world. Test codes draw only from test pools,
 // real codes never do, test pools have their own numbering, and nothing test appears on the public page.
 
@@ -117,9 +118,15 @@ export class RevealStore extends DurableObject {
   }
 
   status() {
-    const pools = this.rows("SELECT * FROM pools WHERE test=0 ORDER BY tier, no").map((x) => ({
-      id: x.id, tier: x.tier, tierName: TIERS[x.tier]?.name || x.tier, price: TIERS[x.tier]?.price ?? null, no: x.no,
-      status: x.status, total: x.total, left: this.left(x.id), hash: x.hash }));
+    const showLeft = this.setting("show_remaining", "0") === "1";
+    const pools = this.rows("SELECT * FROM pools WHERE test=0 ORDER BY tier, no").map((x) => {
+      const pool = { id: x.id, tier: x.tier, tierName: TIERS[x.tier]?.name || x.tier, price: TIERS[x.tier]?.price ?? null, no: x.no,
+        status: x.status, total: x.total, left: this.left(x.id), hash: x.hash };
+      // Only when the owner turns it on: what's still in an open pool, sorted A–Z so it never hints at the draw order.
+      if (showLeft && x.status === "open") pool.remaining = this.rows(`SELECT name, set_name AS "set", number, grader, grade
+          FROM items WHERE pool_id=? AND code IS NULL ORDER BY name, number, grader, grade`, x.id);
+      return pool;
+    });
     const log = this.rows(`SELECT i.*, p.tier FROM items i JOIN pools p ON p.id=i.pool_id WHERE i.code IS NOT NULL AND p.test=0
         ORDER BY i.revealed_at DESC LIMIT 30`).map((it) => this.card(it, it.tier));
     return { tiers: TIERS, pools, log, animation: this.setting("animation", "flip") };
@@ -212,7 +219,8 @@ export class RevealStore extends DurableObject {
     const testCount = {
       pools: this.rows("SELECT COUNT(*) AS n FROM pools WHERE test=1")[0].n,
       codes: this.rows("SELECT COUNT(*) AS n FROM codes WHERE test=1")[0].n };
-    return { pools, revealed, unused, testCount, settings: { animation: this.setting("animation", "flip") }, animations: ANIMATIONS };
+    return { pools, revealed, unused, testCount, animations: ANIMATIONS,
+      settings: { animation: this.setting("animation", "flip"), show_remaining: this.setting("show_remaining", "0") === "1" } };
   }
 
   shipped(id, undo) {
@@ -222,10 +230,13 @@ export class RevealStore extends DurableObject {
   }
 
   saveSettings(b) {
-    const a = String(b.animation || "");
-    if (!ANIMATIONS.includes(a)) throw new UserError("unknown_animation");
-    this.sql.exec("INSERT INTO settings (key, value) VALUES ('animation', ?) ON CONFLICT(key) DO UPDATE SET value=excluded.value", a);
-    return { ok: true, animation: a };
+    const put = (k, v) => this.sql.exec("INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value=excluded.value", k, v);
+    if (b.animation === undefined && b.show_remaining === undefined) throw new UserError("nothing_to_save");
+    if (b.animation !== undefined && !ANIMATIONS.includes(String(b.animation))) throw new UserError("unknown_animation");
+    if (b.show_remaining !== undefined && typeof b.show_remaining !== "boolean") throw new UserError("show_remaining_must_be_true_or_false");
+    if (b.animation !== undefined) put("animation", String(b.animation));
+    if (b.show_remaining !== undefined) put("show_remaining", b.show_remaining ? "1" : "0");
+    return { ok: true, animation: this.setting("animation", "flip"), show_remaining: this.setting("show_remaining", "0") === "1" };
   }
 
   clearTest() {

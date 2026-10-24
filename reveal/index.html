@@ -124,6 +124,14 @@ form.code input:focus{outline:none;border-color:var(--cyan)}
 .meter>div{height:100%;border-radius:999px;background:var(--pink)}
 .fp-l{font-size:.75rem;font-weight:800;letter-spacing:.1em;color:var(--muted);margin-top:6px}
 .fp{font-size:.8125rem;color:var(--cyan);word-break:break-all}
+.left{border-top:1px solid var(--line);padding-top:10px;margin-top:4px}
+.left summary{cursor:pointer;font-weight:800;min-height:44px;display:flex;align-items:center}
+.left summary::-webkit-details-marker{display:none}
+.left summary::before{content:"\25B8";margin-right:.5em;color:var(--cyan)}
+.left[open] summary::before{content:"\25BE"}
+.left ul{margin:4px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px;max-height:280px;overflow:auto}
+.left li{display:flex;justify-content:space-between;gap:12px;font-size:.9375rem}
+.left li span:last-child{color:var(--muted);white-space:nowrap}
 .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:16px;margin:0;padding:0;list-style:none;counter-reset:s}
 .steps li{border:1px solid var(--line);border-radius:16px;padding:20px;counter-increment:s;color:var(--muted)}
 .steps li::before{content:counter(s);display:block;font-family:'Bungee',Impact,sans-serif;font-size:2rem;color:var(--pink);line-height:1;margin-bottom:8px}
@@ -262,6 +270,14 @@ tbody td{border-top:1px solid var(--line)}
           el("span", {class:"fp-l", text:"LOCKED SHUFFLE FINGERPRINT (SHA-256)"}),
           el("code", {class:"fp mono", text:p.hash})
         ];
+        if (isOpen && p.remaining && p.remaining.length) {
+          var ul = el("ul");
+          p.remaining.forEach(function(c){
+            ul.appendChild(el("li", {}, [el("span", {text: [c.name, c.set, c.number].filter(Boolean).join(" · ")}), el("span", {text: grade(c)})]));
+          });
+          kids.push(el("details", {class:"left"}, [el("summary", {text:"What's left (" + p.remaining.length + ")"}), ul,
+            el("p", {class:"hint", style:"margin:8px 0 0", text:"Listed A–Z. The draw order stays locked, so this doesn't show which card is next."})]));
+        }
         if (!isOpen) {
           var b = el("button", {class:"btn-g", type:"button", style:"min-height:44px;padding:.4em 1.1em", text:"Verify this pool"});
           b.addEventListener("click", function(){ verify(p, out); });
