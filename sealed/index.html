@@ -29,6 +29,8 @@ h1 span{color:var(--pink)}
 .art img.cut{position:absolute;left:50%;top:50%;width:94%;height:auto;transform:translate(-50%,-50%);filter:drop-shadow(0 12px 18px rgba(0,0,0,.6))}
 .art img.photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .soon{position:absolute;left:10px;top:10px;background:var(--pink);color:var(--bg);border-radius:999px;padding:3px 10px;font-weight:800;font-size:.7rem;letter-spacing:1px}
+.tile.sold .art img.cut,.tile.sold .art img.photo{filter:grayscale(.55) brightness(.8)}
+.soon.out{background:var(--bg);color:var(--pink);border:2px solid var(--pink)}
 .tile.upcoming .art{cursor:default}
 .tile.upcoming .art:hover{transform:none;box-shadow:none}
 .qty{position:absolute;right:10px;bottom:10px;background:var(--cyan);color:var(--bg);font-weight:800;font-size:.8rem;border-radius:999px;padding:.15em .65em;box-shadow:0 2px 8px rgba(0,0,0,.4)}
@@ -104,12 +106,17 @@ h1 span{color:var(--pink)}
   function key(c){return String(c.name||"").trim().toLowerCase()}
   function opt(sel,vals){vals.forEach(function(v){var o=document.createElement("option");o.value=v;o.textContent=v;sel.appendChild(o)})}
 
+  // Products with a page entry but no live eBay listing: keep their page up, marked sold out
+  function soldOut(){
+    return Object.keys(info).filter(function(n){return n.charAt(0)!=="_"&&!groups.some(function(g){return key(g[0])===n.trim().toLowerCase()})})
+      .map(function(n){var x=info[n];return {name:n,set:x.titleTop||"",productType:x.titleBottom||"Sealed",hero:x.hero,glow:x.glow}});
+  }
   function build(cards){
     var map={},order=[];
     cards.forEach(function(c){var k=key(c);if(!map[k]){map[k]=[];order.push(k)}map[k].push(c)});
     groups=order.map(function(k){return map[k]});
     var sets={},types={};
-    cards.concat(info._upcoming||[]).forEach(function(c){if(c.set)sets[c.set]=1;types[c.productType||"Sealed"]=1});
+    cards.concat(info._upcoming||[],soldOut()).forEach(function(c){if(c.set)sets[c.set]=1;types[c.productType||"Sealed"]=1});
     opt(selSet,Object.keys(sets).sort());opt(selType,Object.keys(types).sort());
   }
   function matches(g){
@@ -138,6 +145,15 @@ h1 span{color:var(--pink)}
       +'<div class="pills"><span class="pill c">SEALED</span><span class="pill">'+esc(u.productType||"Sealed")+'</span></div>'
       +'<span class="name">'+esc(u.name)+'</span><div class="info"><span>'+esc(u.set||"")+'</span><span class="p" style="color:var(--muted)">Dropping soon</span></div></div>';
   }
+  function soldTile(u){
+    var href="item.html?p="+encodeURIComponent(u.name);
+    return '<div class="tile sold"><a class="art" href="'+href+'" style="--glow:'+esc(u.glow||"rgba(34,211,238,.38)")+'">'
+      +(u.hero?'<img class="cut" src="'+esc(u.hero)+'" alt="'+esc(u.name)+'" loading="lazy">':'')+'<span class="soon out">SOLD OUT</span></a>'
+      +'<div class="pills"><span class="pill c">SEALED</span><span class="pill">'+esc(u.productType)+'</span></div>'
+      +'<a class="name" href="'+href+'">'+esc(u.name)+'</a>'
+      +'<div class="info"><span>'+esc(u.set)+'</span><span class="p" style="color:var(--muted)">Sold out</span></div>'
+      +'<div class="stock out" style="color:#FF4F9A">Out of stock</div></div>';
+  }
   function render(){
     var list=groups.filter(matches),s=selSort.value;
     if(s==="low")list.sort(function(a,b){return price(a[0])-price(b[0])});
@@ -150,10 +166,16 @@ h1 span{color:var(--pink)}
       if(groups.some(function(g){return key(g[0])===key(u)}))return false;   // listed now: show the real tile instead
       return !t||t.split(/\s+/).every(function(w){return hay.indexOf(w)>=0});
     });
-    grid.innerHTML=list.map(tile).join("")+soon.map(upTile).join("");
+    var out=soldOut().filter(function(u){
+      var t=q.value.trim().toLowerCase(),hay=[u.name,u.set,u.productType,"sealed sold out"].join(" ").toLowerCase();
+      if(selSet.value&&u.set!==selSet.value)return false;
+      if(selType.value&&u.productType!==selType.value)return false;
+      return !t||t.split(/\s+/).every(function(w){return hay.indexOf(w)>=0});
+    });
+    grid.innerHTML=list.map(tile).join("")+soon.map(upTile).join("")+out.map(soldTile).join("");
     var n=list.reduce(function(a,g){return a+g.length},0);
     $("count").textContent=list.length+" item"+(list.length===1?"":"s")+(n!==list.length?" ("+n+" listings)":"");
-    $("empty").style.display=(list.length||soon.length)?"none":"block";
+    $("empty").style.display=(list.length||soon.length||out.length)?"none":"block";
     $("clear").hidden=!(q.value||selSet.value||selType.value);
   }
   [selSet,selType,selSort].forEach(function(s){s.addEventListener("change",render)});
@@ -167,7 +189,7 @@ h1 span{color:var(--pink)}
     info=res[1]||{};
     var sealed=(res[0].cards||[]).filter(function(c){return c.kind==="sealed"});
     build(sealed);render();
-    if(!sealed.length&&!(info._upcoming||[]).length){$("count").textContent="New sealed product is on the way.";$("empty").textContent="Nothing sealed is listed right now. Check back soon, or see every listing on eBay.";$("empty").style.display="block"}
+    if(!sealed.length&&!(info._upcoming||[]).length&&!soldOut().length){$("count").textContent="New sealed product is on the way.";$("empty").textContent="Nothing sealed is listed right now. Check back soon, or see every listing on eBay.";$("empty").style.display="block"}
   }).catch(function(){$("count").textContent="Couldn't load the product list. Please refresh, or see every listing on eBay."});
 })();
 </script>

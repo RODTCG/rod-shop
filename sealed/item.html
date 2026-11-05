@@ -62,6 +62,13 @@ h2{font-family:'Bungee',Impact,sans-serif;font-weight:400;margin:0 0 12px;font-s
 .more a:hover{transform:translateY(-4px)}
 .more .k{color:var(--cyan);font-weight:800;letter-spacing:2px;font-size:.75rem}
 .more .t{font-family:'Bungee',Impact,sans-serif;font-size:1.35rem}
+.soldbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:10px 16px;border:2px solid var(--pink);border-radius:16px;background:rgba(255,79,154,.14);padding:14px 20px;text-align:center}
+.soldbar b{font-family:'Bungee',Impact,sans-serif;font-weight:400;letter-spacing:1px;color:var(--pink);font-size:1.25rem}
+.soldbar span{color:var(--text)}
+.hero.sold img{filter:grayscale(.55) brightness(.8) drop-shadow(0 28px 36px rgba(0,0,0,.65))}
+.buy .stock.out{color:var(--pink)}
+.buy.sold{border-color:var(--pink)}
+.buy .go.off{background:var(--hover);color:var(--muted);pointer-events:none;border:2px solid var(--line)}
 .gone{text-align:center;padding:64px 0;color:var(--muted)}
 .gone h1{margin-bottom:.4em}
 .lb{position:fixed;inset:0;z-index:60;background:rgba(10,4,24,.9);display:flex;align-items:flex-start;justify-content:center;padding:56px 16px 16px}
@@ -121,7 +128,7 @@ h2{font-family:'Bungee',Impact,sans-serif;font-weight:400;margin:0 0 12px;font-s
       +'<p class="cta" style="padding:12px 0 0"><a href="./">Shop sealed</a></p></div>';
   }
 
-  function page(c,copies,x){
+  function page(c,copies,x,sold){
     var name=c.name||"Sealed product",top=x.titleTop,bottom=x.titleBottom;
     if(!top&&!bottom){top=c.set||"";bottom=(c.productType||name).replace(top,"").trim()||name}
     document.title=name+" | ROD TCG";
@@ -131,24 +138,28 @@ h2{font-family:'Bungee',Impact,sans-serif;font-weight:400;margin:0 0 12px;font-s
     var hl=x.highlights||[],half=Math.ceil(hl.length/2);
     function hlBox(h){return '<div class="hl">'+(h.img?'<div class="im"><img src="'+esc(h.img)+'" alt="" loading="lazy"></div>':'')
       +'<div class="tx"><div class="n">'+esc(h.n)+'</div><div class="l">'+esc(h.label)+'</div></div></div>'}
-    var sorted=copies.slice().sort(function(a,b){return price(a)-price(b)}),best=sorted[0];
-    var varies=copies.length>1&&price(sorted[0])!==price(sorted[sorted.length-1]);
+    var sorted=copies.slice().sort(function(a,b){return price(a)-price(b)}),best=sorted[0]||{};
+    var varies=!sold&&copies.length>1&&price(sorted[0])!==price(sorted[sorted.length-1]);
     var heroImg=x.hero?'<img class="cut" src="'+esc(x.hero)+'" alt="'+esc(name)+'">'
       :(photos[0]?'<img class="photo" src="'+esc(size(photos[0],1600))+'" alt="'+esc(name)+'">':'');
     main.innerHTML=
       '<div class="crumbs"><a href="https://rod-tcg.com/shop/">Shop</a> / <a href="./">Sealed</a> / '+esc(name)+'</div>'
+      +(sold?'<div class="soldbar" role="status"><b>SOLD OUT</b><span>This one is out of stock right now. <a href="./">See what else is sealed</a>, or follow us for the next drop.</span></div>':'')
       +'<div class="top"><h1>'+esc(top)+(top?'<br>':'')+'<span>'+esc(bottom)+'</span></h1>'
       +(x.blurb?'<p class="blurb">'+esc(x.blurb)+'</p>':'')+'</div>'
       +'<div class="stage">'
         +(hl.length?'<div class="side l">'+hl.slice(0,half).map(hlBox).join("")+'</div>':'')
-        +'<div class="center"><button class="hero" type="button" data-i="0" aria-label="Zoom listing photos">'+heroImg+'</button>'
+        +'<div class="center"><button class="hero'+(sold?' sold':'')+'" type="button" data-i="0" aria-label="Zoom listing photos">'+heroImg+'</button>'
         +(photos.length?'<div class="hint">Tap a listing photo to zoom</div><div class="thumbs">'+photos.map(function(p,i){return '<button type="button" data-i="'+i+'" aria-label="Listing photo '+(i+1)+'"><img src="'+esc(size(p,225))+'" alt="" loading="lazy"></button>'}).join("")+'</div>':'')
         +'</div>'
         +(hl.length>half?'<div class="side r">'+hl.slice(half).map(hlBox).join("")+'</div>':'')
       +'</div>'
-      +'<div class="buy"><div><div class="k">FACTORY SEALED</div><div class="v">'+(varies?"From ":"")+money(best)+'</div>'
-      +'<div class="stock'+(stockLow(copies)?' low':'')+'">'+stock(copies)+'</div></div>'
-      +'<div class="acts"><a class="go" href="'+esc(best.ebayUrl)+'" target="_blank" rel="noopener">Buy on eBay →</a><a class="back" href="./">Back to sealed</a></div></div>'
+      +(sold
+        ?'<div class="buy sold"><div><div class="k">FACTORY SEALED</div><div class="v">Sold out</div><div class="stock out">Out of stock</div></div>'
+          +'<div class="acts"><a class="go off" aria-disabled="true">Sold out</a><a class="back" href="./">Back to sealed</a></div></div>'
+        :'<div class="buy"><div><div class="k">FACTORY SEALED</div><div class="v">'+(varies?"From ":"")+money(best)+'</div>'
+          +'<div class="stock'+(stockLow(copies)?' low':'')+'">'+stock(copies)+'</div></div>'
+          +'<div class="acts"><a class="go" href="'+esc(best.ebayUrl)+'" target="_blank" rel="noopener">Buy on eBay →</a><a class="back" href="./">Back to sealed</a></div></div>')
       +'<div class="cols">'
         +(x.contents&&x.contents.length?'<div><h2>Full contents</h2><ul class="chk">'+x.contents.map(function(t){return '<li>'+esc(t)+'</li>'}).join("")+'</ul></div>':'')
         +'<div style="align-self:flex-start"><h2>Buying details</h2><div class="det">'
@@ -207,10 +218,20 @@ h2{font-family:'Bungee',Impact,sans-serif;font-weight:400;margin:0 0 12px;font-s
   ]).then(function(res){
     var sealed=(res[0].cards||[]).filter(function(c){return c.kind==="sealed"});
     var c=sealed.filter(function(x){return String(x.ebayItemId)===id})[0];
-    if(!c)return gone();
+    var info=res[1]||{},pname=new URLSearchParams(location.search).get("p")||"";
+    if(!c){
+      // No live listing: if we still have a product entry for it, show the page marked sold out
+      var nm=Object.keys(info).filter(function(n){
+        if(n.charAt(0)==="_")return false;
+        return n===pname||(info[n].ebayItemIds||[]).indexOf(id)>=0;
+      })[0];
+      if(!nm)return gone();
+      var x0=info[nm];
+      return page({name:nm,set:x0.titleTop,productType:x0.titleBottom},[],x0,true);
+    }
     var k=String(c.name||"").trim().toLowerCase();
     var copies=sealed.filter(function(x){return String(x.name||"").trim().toLowerCase()===k});
-    page(c,copies,(res[1]||{})[c.name]||{});
+    page(c,copies,info[c.name]||{});
   }).catch(function(){main.innerHTML='<p class="gone">Couldn\'t load this product. Please refresh, or <a href="https://www.ebay.com/usr/rodtcg">see every listing on eBay</a>.</p>'});
 })();
 </script>

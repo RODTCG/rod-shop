@@ -1,6 +1,7 @@
 {
  "_note": "Extra detail for sealed product pages, keyed by the product name the shop shows (from the eBay title, or overrides.json). Price, photos and the Buy link always come from the live eBay listing in cards.json. Images are paths inside /sealed/. A product with no entry here still gets a page built from its listing photos. '_upcoming' lists products shown as COMING SOON tiles (no price or link) until they are listed on eBay; remove an entry once it's live.",
  "Destined Rivals Elite Trainer Box": {
+  "ebayItemIds": ["940021497736"],
   "titleTop": "Destined Rivals",
   "titleBottom": "Elite Trainer Box",
   "accent": "#FF3B4E",
