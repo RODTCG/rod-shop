@@ -49,7 +49,9 @@
    "1 code card for Pokémon Trading Card Game Live"
   ]
  },
- "_upcoming": [],
+ "_upcoming": [
+  {"name": "Delta Reign Elite Trainer Box", "set": "Delta Reign", "productType": "Elite Trainer Box", "hero": "img/delta-reign-etb.webp", "glow": "rgba(124,220,60,.42)"}
+ ],
  "Prismatic Evolutions Premium Figure Collection": {
   "titleTop": "Prismatic Evolutions",
   "titleBottom": "Premium Figure Collection",
