@@ -65,6 +65,9 @@ h2{font-family:'Bungee',Impact,sans-serif;font-weight:400;margin:0 0 12px;font-s
 .soldbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:10px 16px;border:2px solid var(--pink);border-radius:16px;background:rgba(255,79,154,.14);padding:14px 20px;text-align:center}
 .soldbar b{font-family:'Bungee',Impact,sans-serif;font-weight:400;letter-spacing:1px;color:var(--pink);font-size:1.25rem}
 .soldbar span{color:var(--text)}
+.soldbar.soon{border-color:var(--cyan);background:rgba(34,211,238,.12)}
+.soldbar.soon b{color:var(--cyan)}
+.buy.soon{border-color:var(--cyan)}
 .buy .stock.out{color:var(--pink)}
 .buy.sold{border-color:var(--pink)}
 .buy .go.off{background:var(--hover);color:var(--muted);pointer-events:none;border:2px solid var(--line)}
@@ -128,6 +131,7 @@ h2{font-family:'Bungee',Impact,sans-serif;font-weight:400;margin:0 0 12px;font-s
   }
 
   function page(c,copies,x,sold){
+    var soon=(sold==="soon");if(soon)sold=false;
     var name=c.name||"Sealed product",top=x.titleTop,bottom=x.titleBottom;
     if(!top&&!bottom){top=c.set||"";bottom=(c.productType||name).replace(top,"").trim()||name}
     document.title=name+" | ROD TCG";
@@ -143,6 +147,7 @@ h2{font-family:'Bungee',Impact,sans-serif;font-weight:400;margin:0 0 12px;font-s
       :(photos[0]?'<img class="photo" src="'+esc(size(photos[0],1600))+'" alt="'+esc(name)+'">':'');
     main.innerHTML=
       '<div class="crumbs"><a href="https://rod-tcg.com/shop/">Shop</a> / <a href="./">Sealed</a> / '+esc(name)+'</div>'
+      +(soon?'<div class="soldbar soon" role="status"><b>COMING SOON</b><span>'+(x.releaseDate?'Releases '+esc(x.releaseDate)+'. ':'')+'We\'ll list it on eBay as soon as it lands. <a href="./">See what else is sealed</a>.</span></div>':'')
       +(sold?'<div class="soldbar" role="status"><b>SOLD OUT</b><span>This one is out of stock right now. <a href="./">See what else is sealed</a>, or follow us for the next drop.</span></div>':'')
       +'<div class="top"><h1>'+esc(top)+(top?'<br>':'')+'<span>'+esc(bottom)+'</span></h1>'
       +(x.blurb?'<p class="blurb">'+esc(x.blurb)+'</p>':'')+'</div>'
@@ -156,6 +161,9 @@ h2{font-family:'Bungee',Impact,sans-serif;font-weight:400;margin:0 0 12px;font-s
       +(sold
         ?'<div class="buy sold"><div><div class="k">FACTORY SEALED</div><div class="v">Sold out</div><div class="stock out">Out of stock</div></div>'
           +'<div class="acts"><a class="go off" aria-disabled="true">Sold out</a><a class="back" href="./">Back to sealed</a></div></div>'
+        :soon
+        ?'<div class="buy soon"><div><div class="k">FACTORY SEALED</div><div class="v" style="color:var(--cyan)">Coming soon</div><div class="stock">'+(x.releaseDate?'Releases '+esc(x.releaseDate):'Not listed yet')+'</div></div>'
+          +'<div class="acts"><a class="go off" aria-disabled="true">Coming soon</a><a class="back" href="./">Back to sealed</a></div></div>'
         :'<div class="buy"><div><div class="k">FACTORY SEALED</div><div class="v">'+(varies?"From ":"")+money(best)+'</div>'
           +'<div class="stock'+(stockLow(copies)?' low':'')+'">'+stock(copies)+'</div></div>'
           +'<div class="acts"><a class="go" href="'+esc(best.ebayUrl)+'" target="_blank" rel="noopener">Buy on eBay →</a><a class="back" href="./">Back to sealed</a></div></div>')
@@ -226,7 +234,7 @@ h2{font-family:'Bungee',Impact,sans-serif;font-weight:400;margin:0 0 12px;font-s
       })[0];
       if(!nm)return gone();
       var x0=info[nm];
-      return page({name:nm,set:x0.titleTop,productType:x0.titleBottom},[],x0,true);
+      return page({name:nm,set:x0.titleTop,productType:x0.titleBottom},[],x0,x0.comingSoon?"soon":true);
     }
     var k=String(c.name||"").trim().toLowerCase();
     var copies=sealed.filter(function(x){return String(x.name||"").trim().toLowerCase()===k});
