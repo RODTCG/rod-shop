@@ -540,7 +540,7 @@ h1{font-family:'Bungee',Impact,sans-serif;font-weight:400;font-size:clamp(2.25re
   });
 
   fetch("cards.json?v="+Date.now()).then(function(r){return r.json()}).then(function(d){
-    build((d.cards||[]).filter(function(c){return c.kind!=="sealed"}));fromUrl();render();   // sealed lives on /sealed/
+    build((d.cards||[]).filter(function(c){return c.kind!=="sealed"&&c.kind!=="bulk"&&!/you pick|pick your card/i.test(c.name||"")}));fromUrl();render();   // sealed lives on /sealed/
   }).catch(function(){$("count").textContent="Couldn't load the card list. Please refresh, or see every listing on eBay.";});
 })();
 </script>
