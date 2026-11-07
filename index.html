@@ -171,6 +171,7 @@ h1{font-family:'Bungee',Impact,sans-serif;font-weight:400;font-size:clamp(2.25re
   var $=function(id){return document.getElementById(id)};
   var q=$("q"),grid=$("grid");
   var SYM_REMOTE="https://pokesymbols.com/images/tcg/sets/symbols/";
+  var POKEBALL="img/pokeball.svg";
   var PROMO_IMG="https://rodtcg.wordpress.com/wp-content/uploads/2026/10/black-star-promo.png";
   // set name -> [local file in /symbols, file name on pokesymbols.com]
   var SYMS={
@@ -335,10 +336,10 @@ h1{font-family:'Bungee',Impact,sans-serif;font-weight:400;font-size:clamp(2.25re
     var m=SYMS[name],src,loc="",rem="";
     if(m){loc="symbols/"+m[0]+".png";rem=SYM_REMOTE+m[1]+".png";src=loc}
     else if(/promo/i.test(name)){src=PROMO_IMG}
-    else return '<span class="sym none"></span>';
+    else return '<img class="sym" alt="" loading="lazy" src="'+POKEBALL+'">';
     return '<img class="sym" alt="" loading="lazy" src="'+esc(src)+'" data-rem="'+esc(rem)+'" onerror="symErr(this)">';
   }
-  window.symErr=function(i){var r=i.getAttribute("data-rem");if(r&&i.src.indexOf(r)<0){i.src=r}else{i.classList.add("none")}};
+  window.symErr=function(i){var r=i.getAttribute("data-rem");if(r&&i.src.indexOf(r)<0){i.src=r}else if(i.src.indexOf(POKEBALL)<0){i.removeAttribute("onerror");i.src=POKEBALL}else{i.classList.add("none")}};
 
   function makeDD(id,allText,icon){
     var root=$(id),btn=root.querySelector(".dd-btn"),cur=root.querySelector(".dd-cur"),list=root.querySelector(".dd-list"),val="",items=[],api={onchange:null};
