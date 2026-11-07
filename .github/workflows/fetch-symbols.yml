@@ -46,6 +46,10 @@ jobs:
           fetch scarlet-and-violet scarlet-and-violet scarlet-violet https://images.pokemontcg.io/sv1/symbol.png
           fetch silver-tempest silver-tempest https://images.pokemontcg.io/swsh12/symbol.png
           fetch vivid-voltage vivid-voltage https://images.pokemontcg.io/swsh4/symbol.png
+          fetch delta-reign delta-reign
+          fetch paldean-fates paldean-fates https://images.pokemontcg.io/sv4pt5/symbol.png
+          fetch white-flare white-flare https://images.pokemontcg.io/rsv10pt5/symbol.png
+          fetch fusion-strike fusion-strike https://images.pokemontcg.io/swsh8/symbol.png
           ls -la symbols
           mkdir -p rarities
           for r in special-illustration-rare illustration-rare mega-attack-rare ultra-rare ace-spec-rare double-rare rare uncommon common; do curl -fsSL "https://pokesymbols.com/images/tcg/rarities/$r.png" -o "rarities/$r.png" || echo "FAILED $r"; done
