@@ -101,7 +101,61 @@
       "1 code card for Pokémon Trading Card Game Live"
     ]
   },
+  "Ascended Heroes Elite Trainer Box": {
+    "comingSoon": true,
+    "titleTop": "Ascended Heroes",
+    "titleBottom": "Elite Trainer Box",
+    "accent": "#FACC15",
+    "glow": "rgba(250,204,21,.42)",
+    "hero": "img/ascended-heroes-etb.webp",
+    "blurb": "Mega Dragonite ex takes flight on the newest Elite Trainer Box to join the shop. It brings nine Ascended Heroes booster packs, a full-art foil N's Zekrom promo and everything you need to sleeve up and start playing, all in one box. We'll list it factory sealed on eBay shortly, so check back for the drop.",
+    "highlights": [
+      {
+        "n": "9",
+        "label": "Booster packs"
+      },
+      {
+        "n": "1",
+        "label": "Full-art foil promo"
+      },
+      {
+        "n": "65",
+        "label": "Card sleeves"
+      },
+      {
+        "n": "40",
+        "label": "Energy cards"
+      },
+      {
+        "n": "6+1",
+        "label": "Dice"
+      },
+      {
+        "n": "1",
+        "label": "Collector's box"
+      }
+    ],
+    "contents": [
+      "9 Mega Evolution: Ascended Heroes booster packs",
+      "1 full-art foil promo card featuring N's Zekrom",
+      "65 card sleeves",
+      "40 Pokémon TCG Energy cards",
+      "1 player's guide to the Ascended Heroes expansion",
+      "6 damage-counter dice",
+      "1 competition-legal coin-flip die",
+      "1 plastic coin",
+      "1 collector's box with 6 dividers",
+      "1 code card for Pokémon Trading Card Game Live"
+    ]
+  },
   "_upcoming": [
+    {
+      "name": "Ascended Heroes Elite Trainer Box",
+      "set": "Ascended Heroes",
+      "productType": "Elite Trainer Box",
+      "hero": "img/ascended-heroes-etb.webp",
+      "glow": "rgba(250,204,21,.42)"
+    },
     {
       "name": "Delta Reign Elite Trainer Box",
       "set": "Delta Reign",
